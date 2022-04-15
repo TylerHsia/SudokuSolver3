@@ -1,6 +1,5 @@
 package Main;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 // A class which represents the candidates of one cell in a sudoku grid
@@ -107,7 +106,7 @@ public class Cell {
      * warning: this list will change as the candidates of this cell change
      * @return an unmodifiable set of the candidates of this list
      */
-    public Set<Integer> getCandidates(){
+    public Set<Integer> getCands(){
         return Collections.unmodifiableSet(candidates);
     }
 
@@ -133,5 +132,13 @@ public class Cell {
         if (value < 1 || value > 9){
             throw new IllegalArgumentException("Value is outside range 1-9");
         }
+    }
+
+    @Override
+    public String toString(){
+        if(isSolved()){
+            return "" + getVal();
+        }
+        return "0";
     }
 }

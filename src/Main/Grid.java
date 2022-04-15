@@ -2,7 +2,7 @@ package Main;
 
 import java.util.*;
 
-public class Grid {
+public class Grid implements Iterable<Cell> {
 
     private final Cell[] cells;
 
@@ -33,7 +33,7 @@ public class Grid {
      * @return the set of candidates at this position
      */
     public Set<Integer> getCands(int row, int column){
-        return getCell(row, column).getCandidates();
+        return getCell(row, column).getCands();
     }
 
     /**
@@ -64,7 +64,7 @@ public class Grid {
      * @param value the value to be removed
      * @return true iff this cell's candidates contained value
      */
-    public boolean remove(int row, int column, int value){
+    public boolean removeCand(int row, int column, int value){
         return getCell(row, column).remove(value);
     }
 
@@ -154,7 +154,7 @@ public class Grid {
             cands.put(i, 0);
         }
         for(Cell cell: cells){
-            for(int cand: cell.getCandidates()){
+            for(int cand: cell.getCands()){
                 cands.put(cand, cands.get(cand) + 1);
             }
         }
@@ -214,4 +214,37 @@ public class Grid {
     private Cell getCell(int row, int column){
         return cells[row * 9 + column];
     }
+
+    @Override
+    public String toString(){
+        StringBuilder stringRepresentation = new StringBuilder();
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                stringRepresentation.append(getCell(r, c).toString());
+            }
+            stringRepresentation.append("\n");
+        }
+        return stringRepresentation.toString();
+    }
+
+    public Iterator<Cell> rowItr(int row){
+        return getRowCells(row).iterator();
+    }
+
+    public Iterator<Cell> columnItr(int column){
+        return getColumnCells(column).iterator();
+    }
+
+    public Iterator<Cell> boxItr(int row, int column){
+        return getBoxCells(row, column).iterator();
+    }
+
+    public Iterator<Cell> iterator(){
+        return Arrays.asList(cells).iterator();
+    }
+
+    //Todo: grid isSolved
+    //Todo: grid numSolved
+    //Todo: grid has duplicate
+    //Todo: can solve/remove without making duplicate
 }
