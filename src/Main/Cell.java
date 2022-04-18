@@ -92,11 +92,11 @@ public class Cell {
 
     /**
      * Returns the solved value of this cell
-     * @return returns the only candidate in this cell if it is solved, otherwise returns -1
+     * @return returns the only candidate in this cell if it is solved, otherwise returns 0
      */
     public int getVal(){
         if (!isSolved()){
-            return -1;
+            return 0;
         }
         return candidates.iterator().next();
     }
