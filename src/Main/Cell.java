@@ -6,6 +6,9 @@ import java.util.*;
 public class Cell {
     private Set<Integer> candidates;
     private final int ONE_CAND_CAP = 1; // the initial capacity of the set for a cell with one candidate
+    private int row;
+    private int column;
+    private int coord;
 
     // checks that this cell represents a valid cell of a sudoku grid
     private void checkRep(){
@@ -20,6 +23,21 @@ public class Cell {
     public Cell(){
         candidates = new HashSet<>(9);
         fill(candidates);
+    }
+
+
+    public Cell(int row, int column){
+        this();
+        this.row = row;
+        this.column = column;
+        this.coord = row * 9 + column;
+    }
+
+    public Cell(int row, int column, int value){
+        this(value);
+        this.row = row;
+        this.column = column;
+        this.coord = row * 9 + column;
     }
 
     /**
@@ -42,15 +60,18 @@ public class Cell {
     }
 
     /**
+     * Solves this cell to the value given. if value is outside range 1-9, does nothing
      * @param value the value to be solved for
-     * @throws IllegalStateException if value is not a candidate
+     * @throws IllegalStateException if value is in range 1-9 and is not a candidate
      */
     public void solve(int value){
-        if (!contains(value)){
-            throw new IllegalStateException();
+        if(1 <= value && value <= 9){
+            if (!contains(value)){
+                throw new IllegalStateException();
+            }
+            candidates = new HashSet<>(ONE_CAND_CAP);
+            candidates.add(value);
         }
-        candidates = new HashSet<>(ONE_CAND_CAP);
-        candidates.add(value);
     }
 
     /**
@@ -134,11 +155,32 @@ public class Cell {
         }
     }
 
+    /**
+     * @return the row of this cell
+     */
+    public int getRow(){
+        return row;
+    }
+
+    /**
+     * @return the column of this cell
+     */
+    public int getColumn(){
+        return column;
+    }
+
+    /**
+     * @return the single number coord of this cell, equals to getRow() * 9 + getColumn();
+     */
+    public int getCoord(){
+        return coord;
+    }
+
     @Override
     public String toString(){
         if(isSolved()){
             return "" + getVal();
         }
-        return "0";
+        return " ";
     }
 }
