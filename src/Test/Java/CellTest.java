@@ -11,7 +11,7 @@ public class CellTest {
         Cell cell1 = new Cell();
         assertEquals(cell1.size(), 9);
         assertFalse(cell1.isSolved());
-        assertEquals(cell1.getVal(), -1);
+        assertEquals(cell1.getVal(), 0);
         for(int i = 1; i <= 9; i++){
             assertTrue(cell1.contains(i));
         }
@@ -85,7 +85,7 @@ public class CellTest {
     public void test_solve_throws(){
         //throws for non 2
         Cell two = new Cell(2);
-        for(int i = 0; i < 20; i++){
+        for(int i = 1; i <= 9; i++){
             if(i != 2){
                 int finalI = i;
                 assertThrows(IllegalStateException.class, ()->
@@ -117,4 +117,6 @@ public class CellTest {
 
 
     //Todo: test throws with invalid parameters
+
+    //Todo: test cell coord, row, column
 }
