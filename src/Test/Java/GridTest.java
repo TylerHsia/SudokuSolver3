@@ -3,17 +3,25 @@ import Main.Cell;
 import Main.Grid;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
 import java.util.*;
 
 import static org.junit.Assert.*;
 
 public class GridTest {
+    Scanner sudokScanner;
     Grid grid;
     Set<Integer> cands;
+    String testCasesFile;
+    String[] difFiles = new String[6];
+
     @Before
     public void setUpVariables(){
         grid = new Grid();
         cands = allCands();
+        testCasesFile = "testCases.txt";
+        difFiles = new String[]{null, "diff1.txt", "diff2.txt", "diff3.txt", "diff4.txt", "diff5.txt"};
     }
     @Test
     public void test_simple_construction_and_accessors(){
@@ -21,7 +29,7 @@ public class GridTest {
         for(Cell cell: grid){
             count++;
             assertEquals(cands, cell.getCands());
-            assertEquals(-1, cell.getVal());
+            assertEquals(0, cell.getVal());
             assertFalse(cell.isSolved());
         }
         assertEquals(81, count);
@@ -55,7 +63,7 @@ public class GridTest {
         //check first column cells
         for(int r = 0; r < 9; r++){
             cands.remove(r + 1);
-            assertEquals(-1, grid.getVal(r, 0));
+            assertEquals(0, grid.getVal(r, 0));
             assertEquals(cands, grid.getCands(r, 0));
             cands.add(r + 1);
             assertFalse(grid.isSolved(r, 0));
@@ -143,7 +151,7 @@ public class GridTest {
 
         //Test starting state
         for(int r = 0; r < 9; r++){
-            rowMap = grid.numCandsRow(r);
+            rowMap = grid.getRowCands(r);
             assertEquals(9, rowMap.size());
             for(int key = 1; key <= 9; key++){
                 assertEquals(9, (int) rowMap.get(key));
@@ -151,13 +159,13 @@ public class GridTest {
         }
         //removed one cand
         removeOneThroughNine(grid.rowItr(0));
-        rowMap = grid.numCandsRow(0);
+        rowMap = grid.getRowCands(0);
         for(int val = 1; val <= 9; val++){
             assertEquals(8, (int) rowMap.get(val));
         }
         //solved all cands
         solveOneThroughNine(grid.rowItr(1));
-        rowMap = grid.numCandsRow(1);
+        rowMap = grid.getRowCands(1);
         for(int val = 1; val <= 9; val++){
             assertEquals(1, (int) rowMap.get(val));
         }
@@ -168,7 +176,7 @@ public class GridTest {
         Map<Integer, Integer> columnMap;
         //test starting state
         for(int c = 0; c < 9; c++){
-            columnMap = grid.numCandsColumn(c);
+            columnMap = grid.getColumnCands(c);
             assertEquals(9, columnMap.size());
             for(int key = 1; key <= 9; key++){
                 assertEquals(9, (int) columnMap.get(key));
@@ -176,13 +184,13 @@ public class GridTest {
         }
         //removed one cand
         removeOneThroughNine(grid.columnItr(0));
-        columnMap = grid.numCandsColumn(0);
+        columnMap = grid.getColumnCands(0);
         for(int val = 1; val <= 9; val++){
             assertEquals(8, (int) columnMap.get(val));
         }
         //solved all cands
         solveOneThroughNine(grid.columnItr(1));
-        columnMap = grid.numCandsColumn(1);
+        columnMap = grid.getColumnCands(1);
         for(int val = 1; val <= 9; val++){
             assertEquals(1, (int) columnMap.get(val));
         }
@@ -194,7 +202,7 @@ public class GridTest {
         //test starting state
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
-                boxMap = grid.numCandsBox(r, c);
+                boxMap = grid.getBoxCands(r, c);
                 assertEquals(9, boxMap.size());
                 for(int key = 1; key <= 9; key++){
                     assertEquals(9, (int) boxMap.get(key));
@@ -204,16 +212,151 @@ public class GridTest {
 
         //removed one cand
         removeOneThroughNine(grid.boxItr(0, 0));
-        boxMap = grid.numCandsBox(0, 0);
+        boxMap = grid.getBoxCands(0, 0);
         for(int val = 1; val <= 9; val++){
             assertEquals(8, (int) boxMap.get(val));
         }
         //solved all cands
         solveOneThroughNine(grid.boxItr(3, 3));
-        boxMap = grid.numCandsBox(3, 3);
+        boxMap = grid.getBoxCands(3, 3);
         for(int val = 1; val <= 9; val++){
             assertEquals(1, (int) boxMap.get(val));
         }
+    }
+
+    @Test
+    public void test_is_solved(){
+        initializeScanner(testCasesFile);
+        grid = new Grid(sudokScanner.next());
+        assertTrue(grid.isSolved());
+        for(int dif = 1; dif <= 5; dif++){
+            initializeScanner(difFiles[dif]);
+            while(sudokScanner.hasNext()){
+                grid = new Grid(sudokScanner.next());
+                assertFalse(grid.isSolved());
+            }
+        }
+    }
+
+    @Test
+    public void test_num_solved(){
+        initializeScanner(testCasesFile);
+        grid = new Grid(sudokScanner.next());
+        assertEquals(81, grid.numSolved());
+        for(int dif = 1; dif <= 5; dif++){
+            initializeScanner(difFiles[dif]);
+            while(sudokScanner.hasNext()){
+                String next = sudokScanner.next();
+                grid = new Grid(next);
+                assertEquals(81 - numZeroes(next), grid.numSolved());
+            }
+        }
+        grid = new Grid();
+        assertEquals(0, grid.numSolved());
+        for(int r = 0; r < 9; r++){
+            grid.solveCell(r, 0, r + 1);
+            grid.removeCand(r, 1, r + 1);
+            assertEquals(r + 1, grid.numSolved());
+        }
+    }
+
+    //returns the number of spaces in a string from index 0 to 80
+    private int numZeroes(String sudoku){
+        int numZero = 0;
+        for(int i = 0; i < 81; i++){
+            if(sudoku.charAt(i) == '0'){
+                numZero++;
+            }
+        }
+        return numZero;
+    }
+
+    @Test
+    public void test_has_duplicate(){
+        assertFalse(grid.hasDuplicate());
+
+        //rowdup
+        grid.solveCell(0, 0, 1);
+        assertFalse(grid.hasDuplicate());
+        grid.solveCell(8, 0, 1);
+        assertTrue(grid.hasDuplicate());
+        grid.solveCell(2, 0, 1);
+        assertTrue(grid.hasDuplicate());
+        grid.solveCell(3, 0, 2);
+        assertTrue(grid.hasDuplicate());
+
+        //column dup
+        grid = new Grid();
+        grid.solveCell(0, 0, 1);
+        assertFalse(grid.hasDuplicate());
+        grid.solveCell(0, 8, 1);
+        assertTrue(grid.hasDuplicate());
+
+        //box dup
+        grid = new Grid();
+        grid.solveCell(0, 0, 1);
+        assertFalse(grid.hasDuplicate());
+        grid.solveCell(2, 2, 1);
+        assertTrue(grid.hasDuplicate());
+
+        //all dup
+        grid = new Grid();
+        for(Cell cell: grid){
+            cell.solve(1);
+        }
+        assertTrue(grid.hasDuplicate());
+
+
+
+        initializeScanner(testCasesFile);
+        grid = new Grid(sudokScanner.next());
+        assertFalse(grid.hasDuplicate());
+        for(int dif = 1; dif <= 5; dif++){
+            initializeScanner(difFiles[dif]);
+            while(sudokScanner.hasNext()){
+                grid = new Grid(sudokScanner.next());
+                assertFalse(grid.hasDuplicate());
+            }
+        }
+    }
+
+    @Test
+    public void test_can_solve_simple(){
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                for(int val = 1; val <= 9; val++){
+                    assertTrue(grid.canSolveSimple(r, c, val));
+                }
+            }
+        }
+
+        //rowdup
+        grid.solveCell(0, 0, 1);
+        for(int rc = 1; rc < 9; rc++){
+            assertFalse(grid.canSolveSimple(rc,0, 1));
+            assertFalse(grid.canSolveSimple(0, rc, 1));
+        }
+
+        assertFalse(grid.canSolveSimple(1,1, 1));
+        assertFalse(grid.canSolveSimple(2,1, 1));
+        assertFalse(grid.canSolveSimple(1,2, 1));
+        assertFalse(grid.canSolveSimple(2,2, 1));
+
+
+        grid.removeCand(8, 8, 1);
+        assertFalse(grid.canSolveSimple(8, 8, 1));
+    }
+
+    @Test
+    public void test_can_remove_simple(){
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                for(int val = 1; val <= 9; val++){
+                    assertTrue(grid.canRemoveSimple(r, c, val));
+                }
+            }
+        }
+        //Todo: finish implementing this
     }
 
     private void removeOneThroughNine(Iterator<Cell> itr){
@@ -241,7 +384,7 @@ public class GridTest {
             for (Iterator<Cell> it = grid.columnItr(c); it.hasNext(); ) {
                 Cell cell = it.next();
                 assertEquals(allCands, cell.getCands());
-                assertEquals(-1, cell.getVal());
+                assertEquals(0, cell.getVal());
                 assertFalse(cell.isSolved());
             }
         }
@@ -254,4 +397,13 @@ public class GridTest {
         }
         return allCands;
     }
+
+    private void initializeScanner(String fileName){
+        try{
+            sudokScanner = new Scanner(new File("src/Test/text/" + fileName));
+        } catch (Exception e){
+            throw new RuntimeException();
+        }
+    }
+
 }
