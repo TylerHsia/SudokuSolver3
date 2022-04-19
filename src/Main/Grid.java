@@ -1,6 +1,5 @@
 package Main;
 
-import java.io.StringReader;
 import java.util.*;
 
 public class Grid implements Iterable<Cell> {
@@ -13,7 +12,7 @@ public class Grid implements Iterable<Cell> {
     public Grid(){
         cells = new Cell[81];
         for(int i = 0; i < cells.length; i++){
-            cells[i] = new Cell();
+            cells[i] = new Cell(i / 9, i % 9);
         }
     }
 
@@ -22,10 +21,11 @@ public class Grid implements Iterable<Cell> {
      * consist of only numbers 0 through 9, 0 corresponding to an empty cell
      * and any other number corresponding to that number in the cell.
      * Cells should be in order from left to right then top to bottom
+     * ignores characters in index greater than 80
      * @requires string is in proper format
      */
     public Grid(String board){
-        cells = new Cell[81];
+        this();
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
                 getCell(r, c).solve(board.charAt(r * 9 + c) - 48);
@@ -78,14 +78,14 @@ public class Grid implements Iterable<Cell> {
      * @return true iff all cells are solved and there are no duplicates
      */
     public boolean isSolved(){
-        return numSolved() == 81 && !containsDuplicate();
+        return numSolved() == 81 && !hasDuplicate();
     }
 
     /**
      * Returns the number of solved cells in this grid
      * @return the number of solved cells in this grid
      */
-    private int numSolved(){
+    public int numSolved(){
         int numSolved = 0;
         for(Cell cell: this){
             if(cell.isSolved()){
@@ -282,19 +282,19 @@ public class Grid implements Iterable<Cell> {
      * @return true iff there are two cells in the same row, column, or box
      * with the same solved value
      */
-    public boolean containsDuplicate(){
+    public boolean hasDuplicate(){
         //check rows and column
         for(int rc = 0; rc < 9; rc++){
-            if(containsDuplicate(rowItr(rc))){
+            if(hasDuplicate(rowItr(rc))){
                 return true;
             }
-            if(containsDuplicate(columnItr(rc))){
+            if(hasDuplicate(columnItr(rc))){
                 return true;
             }
         }
         //check boxes
         for(int box = 0; box < 9; box++){
-            if(containsDuplicate(boxItr(box / 3, box % 3))){
+            if(hasDuplicate(boxItr(box / 3, box % 3))){
                 return true;
             }
         }
@@ -307,7 +307,7 @@ public class Grid implements Iterable<Cell> {
      * @param itr the iterator over a given set of cells
      * @return true iff this itr contains two cells with the same value
      */
-    private boolean containsDuplicate(Iterator<Cell> itr){
+    private boolean hasDuplicate(Iterator<Cell> itr){
         HashSet<Integer> rowVals = new HashSet<>(9);
         while(itr.hasNext()) {
             Cell cell = itr.next();
@@ -329,7 +329,8 @@ public class Grid implements Iterable<Cell> {
      */
     public boolean canSolveSimple(int row, int column, int val){
         return(!getRow(row).contains(val) && !getColumn(column).contains(val)
-                && !getBox(row, column).contains(val));
+                && !getBox(row, column).contains(val))
+                && getCell(row, column).contains(val);
     }
 
     /**
