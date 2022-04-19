@@ -5,10 +5,14 @@ import jdk.jshell.spi.ExecutionControl;
 import java.util.Queue;
 import java.util.*;
 
-//Todo: make generic
-public class QueueSet implements Queue<Integer> {
-    private Set<Integer> elementSet;
-    private Queue<Integer> elementQueue;
+/**
+ * A class which represents a queue of items, which has the set property that no two items
+ * in the queue are equal. If an equal item is added to the queue, nothing happens.
+ * @param <E> The type of elements of the QueueSet
+ */
+public class QueueSet<E> implements Queue<E> {
+    private Set<E> elementSet;
+    private Queue<E> elementQueue;
 
     public QueueSet(){
         elementSet = new HashSet<>(81);
@@ -32,8 +36,19 @@ public class QueueSet implements Queue<Integer> {
     }
 
     @Override
-    public Iterator<Integer> iterator() {
-        return elementQueue.iterator();
+    public Iterator<E> iterator() {
+        return new Iterator<>(){
+            Iterator<E> itr = elementQueue.iterator();
+            @Override
+            public boolean hasNext() {
+                return itr.hasNext();
+            }
+
+            @Override
+            public E next() {
+                return itr.next();
+            }
+        };
     }
 
     @Override
@@ -43,13 +58,13 @@ public class QueueSet implements Queue<Integer> {
 
     @Override
     public <T> T[] toArray(T[] a) {
-        throw new RuntimeException("Not Implemented.");
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean add(Integer integer) {
-        if(elementSet.add(integer)){
-            elementQueue.add(integer);
+    public boolean add(E val) {
+        if(elementSet.add(val)){
+            elementQueue.add(val);
             return true;
         }
         return false;
@@ -57,19 +72,19 @@ public class QueueSet implements Queue<Integer> {
 
     @Override
     public boolean remove(Object o) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean addAll(Collection<? extends Integer> c) {
+    public boolean addAll(Collection<? extends E> c) {
         boolean changed = false;
-        for(Integer integer : c){
-            if(add(integer)){
+        for(E val : c){
+            if(add(val)){
                 changed = true;
             }
         }
@@ -78,12 +93,12 @@ public class QueueSet implements Queue<Integer> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -93,29 +108,32 @@ public class QueueSet implements Queue<Integer> {
     }
 
     @Override
-    public boolean offer(Integer integer) {
-        return false;
+    public boolean offer(E val) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Integer remove() {
-        int removed = elementQueue.remove();
+    public E remove() {
+        E removed = elementQueue.remove();
         elementSet.remove(removed);
         return removed;
     }
 
     @Override
-    public Integer poll() {
-        return null;
+    public E poll() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Integer element() {
-        return null;
+    public E element() {
+        return elementQueue.peek();
     }
 
     @Override
-    public Integer peek() {
+    public E peek() {
+        if(elementQueue.isEmpty()){
+            return null;
+        }
         return elementQueue.peek();
     }
 }
