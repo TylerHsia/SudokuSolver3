@@ -4,7 +4,8 @@ import java.util.*;
 
 public class Solver {
     public Grid grid; // do not modify outside of class
-    private Queue<Integer> solvedCoords;
+    //Todo: change to only changedCoords, just use an if in the solver to differentiate solved
+    //Todo: change to a queue of cells? or a queue of row,column pairs?
     private Queue<Integer> changedCoords;
 
     /**
@@ -13,16 +14,9 @@ public class Solver {
      */
     public Solver(Grid grid){
         this.grid = grid;
-        changedCoords = new QueueSet();
+        changedCoords = new QueueSet<Integer>();
         for(int i = 0; i < 81; i++){
             changedCoords.add(i);
-        }
-        solvedCoords = new QueueSet();
-        Iterator<Cell> cells = grid.iterator();
-        for(int i = 0; i < 81; i++){
-            if(cells.next().isSolved()){
-                solvedCoords.add(i);
-            }
         }
     }
 
@@ -33,18 +27,13 @@ public class Solver {
     public boolean solve(){
         //Todo: fix this logic
         //Todo: try having solve methods return the list of cells modified
-        while(!grid.isSolved() && (!solvedCoords.isEmpty() || !changedCoords.isEmpty())){
-            while(!grid.isSolved() && !changedCoords.isEmpty()){
-                int changed = changedCoords.remove();
-                int row = changed / 9;
-                int column = changed % 9;
-                removeRookBox(row, column);
-            }
-            while(!grid.isSolved() && !solvedCoords.isEmpty()){
-                int solved = solvedCoords.remove();
-                int row = solved / 9;
-                int column = solved % 9;
-                removeRookBox(row, column);
+        while(!grid.isSolved() && !changedCoords.isEmpty()){
+            int changed = changedCoords.remove();
+            int row = changed / 9;
+            int column = changed % 9;
+
+            if(grid.isSolved(row, column)){
+                removeRookBox(row, column, changedCoords);
             }
         }
         return grid.isSolved();
@@ -57,11 +46,12 @@ public class Solver {
      * @param column column of cell
      * @return true if a change was made
      */
-    public boolean removeRookBox(int row, int column){
+    public boolean removeRookBox(int row, int column, Queue<Integer> changedCoords){
+        Queue<Integer> changed = new QueueSet<Integer>();
         int val = grid.getVal(row, column);
-        boolean c1 = removeFromItr(grid.rowItr(row), val);
-        boolean c2 = removeFromItr(grid.columnItr(column), val);
-        boolean c3 = removeFromItr(grid.boxItr(row, column), val);
+        boolean c1 = removeFromItr(grid.rowItr(row), val, changedCoords);
+        boolean c2 = removeFromItr(grid.columnItr(column), val, changedCoords);
+        boolean c3 = removeFromItr(grid.boxItr(row, column), val, changedCoords);
         return c1 || c2 || c3;
     }
 
@@ -71,7 +61,7 @@ public class Solver {
      * @param value the value to be removed from those cells
      * @return true if a cell was modified
      */
-    private boolean removeFromItr(Iterator<Cell> itr, int value){
+    private boolean removeFromItr(Iterator<Cell> itr, int value, Queue<Integer> changedCoords){
         boolean changed = false;
         while(itr.hasNext()){
             Cell next = itr.next();
@@ -80,16 +70,9 @@ public class Solver {
                 if(removed){
                     changed = true;
                     changedCoords.add(next.getCoord());
-                    if(next.isSolved()){
-                        solvedCoords.add(next.getCoord());
-                    }
                 }
             }
         }
         return changed;
     }
-
-
-
-
 }
