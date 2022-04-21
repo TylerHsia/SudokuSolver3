@@ -58,7 +58,7 @@ public class GridTest {
     public void test_remove_once(){
         //remove first column 1-9
         for(int r = 0; r < 9; r++){
-            grid.removeCand(r, 0, r + 1);
+            assertTrue(grid.removeCand(r, 0, r + 1));
         }
         //check first column cells
         for(int r = 0; r < 9; r++){
@@ -72,6 +72,21 @@ public class GridTest {
         assertAllButFirstColumnDefault(grid);
     }
 
+    @Test
+    public void test_remove_return(){
+        //remove first column 1-9
+        for(int r = 0; r < 9; r++){
+            assertTrue(grid.removeCand(r, 0, r + 1));
+        }
+        //remove first column 1-9 again
+        for(int r = 0; r < 9; r++){
+            assertFalse(grid.removeCand(r, 0, r + 1));
+        }
+        //remove first cell non 1-9
+        for(int i = 10; i < 1000; i++){
+            assertFalse(grid.removeCand(0, 0, i));
+        }
+    }
 
     @Test
     public void test_remove_all_but_one_val(){
@@ -80,7 +95,7 @@ public class GridTest {
         for(int r = 0; r < 9; r++){
             for(int cand = 1; cand <= 9; cand++){
                 if(cand != r + 1){
-                    grid.removeCand(r, 0, cand);
+                    assertTrue(grid.removeCand(r, 0, cand));
                 }
             }
         }
@@ -255,7 +270,7 @@ public class GridTest {
         assertEquals(0, grid.numSolved());
         for(int r = 0; r < 9; r++){
             grid.solveCell(r, 0, r + 1);
-            grid.removeCand(r, 1, r + 1);
+            assertTrue(grid.removeCand(r, 1, r + 1));
             assertEquals(r + 1, grid.numSolved());
         }
     }
@@ -343,7 +358,7 @@ public class GridTest {
         assertFalse(grid.canSolveSimple(2,2, 1));
 
 
-        grid.removeCand(8, 8, 1);
+        assertTrue(grid.removeCand(8, 8, 1));
         assertFalse(grid.canSolveSimple(8, 8, 1));
     }
 
