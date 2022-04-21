@@ -53,7 +53,7 @@ public class QueueSet<E> implements Queue<E> {
 
     @Override
     public Object[] toArray() {
-        return elementQueue.toArray();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -103,8 +103,7 @@ public class QueueSet<E> implements Queue<E> {
 
     @Override
     public void clear() {
-        elementSet = new HashSet<>(81);
-        elementQueue = new LinkedList<>();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -126,14 +125,11 @@ public class QueueSet<E> implements Queue<E> {
 
     @Override
     public E element() {
-        return elementQueue.peek();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public E peek() {
-        if(elementQueue.isEmpty()){
-            return null;
-        }
         return elementQueue.peek();
     }
 }
