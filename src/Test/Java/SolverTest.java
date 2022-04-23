@@ -36,7 +36,6 @@ public class SolverTest {
     public void test_remove_rook_box(){
         sudokScanner = initializeScanner(difFiles[1]);
         while(sudokScanner.hasNext()){
-            System.out.println("he");
             grid = new Grid(sudokScanner.next());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
@@ -46,8 +45,7 @@ public class SolverTest {
 
     private Scanner initializeScanner(String fileName){
         try{
-            Scanner scanner = new Scanner(new File("src/Test/text/" + fileName));
-            return scanner;
+            return new Scanner(new File("src/Test/text/" + fileName));
         } catch (Exception e){
             throw new RuntimeException();
         }
