@@ -334,38 +334,6 @@ public class Grid implements Iterable<Cell> {
     }
 
     /**
-     * Check for whether this.remove(row, column, val) will result in an
-     * invalid state of a sudoku grid
-     * @param row the row of the position to be checked
-     * @param column the column of the position to be checked
-     * @param val the val to be checked if it can be removed from position
-     * @return true iff val can be removed from position resulting in a simple valid state
-     */
-    public boolean canRemoveSimple(int row, int column, int val){
-        Set<Integer> cands = getCands(row, column);
-        //if cell already doesn't have val as a candidate
-        if(!cands.contains(val)){
-            return true;
-        }
-        //if cell has only one candidate
-        if(cands.size() == 1){
-            return false;
-        }
-        //if cell has two candidates, it will be solved after the removal, check that
-        //solved val isn't duplicate
-        if(cands.size() == 2){
-            cands.remove(val);
-            int solvedTo = cands.iterator().next();
-            if(!canSolveSimple(row, column, solvedTo)){
-                return false;
-            }
-        }
-        return  getRowCands(row).get(val) > 1 //something else in the row can have the removed val
-                && getColumnCands(column).get(val) > 1 //in the column
-                && getBoxCands(row, column).get(val) > 1; //in the box
-    }
-
-    /**
      * Returns an iterator that will iterate over all cells in the given row
      * @param row the row to be iterated over
      * @return an iterator over the given row

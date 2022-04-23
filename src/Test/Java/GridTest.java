@@ -362,18 +362,6 @@ public class GridTest {
         assertFalse(grid.canSolveSimple(8, 8, 1));
     }
 
-    @Test
-    public void test_can_remove_simple(){
-        for(int r = 0; r < 9; r++){
-            for(int c = 0; c < 9; c++){
-                for(int val = 1; val <= 9; val++){
-                    assertTrue(grid.canRemoveSimple(r, c, val));
-                }
-            }
-        }
-        //Todo: finish implementing this
-    }
-
     private void removeOneThroughNine(Iterator<Cell> itr){
         int val = 1;
         while (itr.hasNext()) {
