@@ -84,9 +84,7 @@ public class QueueSet<E> implements Queue<E> {
     public boolean addAll(Collection<? extends E> c) {
         boolean changed = false;
         for(E val : c){
-            if(add(val)){
-                changed = true;
-            }
+            changed |= add(val);
         }
         return changed;
     }
