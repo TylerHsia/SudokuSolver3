@@ -265,7 +265,7 @@ public class Grid implements Iterable<Cell> {
         StringBuilder stringRepresentation = new StringBuilder();
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
-                stringRepresentation.append(getCell(r, c).toString());
+                stringRepresentation.append(getCell(r, c).toStringNoCands());
             }
             stringRepresentation.append("\n");
         }

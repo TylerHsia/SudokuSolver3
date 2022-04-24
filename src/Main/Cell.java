@@ -178,6 +178,10 @@ public class Cell {
 
     @Override
     public String toString(){
+        return candidates.toString();
+    }
+
+    public String toStringNoCands(){
         if(isSolved()){
             return "" + getVal();
         }
