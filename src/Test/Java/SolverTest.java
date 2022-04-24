@@ -33,15 +33,25 @@ public class SolverTest {
     }
 
     @Test
-    public void test_remove_rook_box(){
+    public void test_dif_1(){
         sudokScanner = initializeScanner(difFiles[1]);
         while(sudokScanner.hasNext()){
             grid = new Grid(sudokScanner.next());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
-
         }
     }
+
+    @Test
+    public void test_dif_2(){
+        sudokScanner = initializeScanner(difFiles[2]);
+        while(sudokScanner.hasNext()){
+            grid = new Grid(sudokScanner.next());
+            Solver solver = new Solver(grid);
+            assertTrue(solver.solve());
+        }
+    }
+    //Todo: test for removeRookBox
 
     private Scanner initializeScanner(String fileName){
         try{
