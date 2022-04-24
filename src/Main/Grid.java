@@ -193,8 +193,10 @@ public class Grid implements Iterable<Cell> {
             cands.put(i, 0);
         }
         for(Cell cell: cells){
-            for(int cand: cell.getCands()){
-                cands.put(cand, cands.get(cand) + 1);
+            if(!cell.isSolved()) {
+                for (int cand : cell.getCands()) {
+                    cands.put(cand, cands.get(cand) + 1);
+                }
             }
         }
         return cands;

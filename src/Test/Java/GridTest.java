@@ -182,7 +182,7 @@ public class GridTest {
         solveOneThroughNine(grid.rowItr(1));
         rowMap = grid.getRowCands(1);
         for(int val = 1; val <= 9; val++){
-            assertEquals(1, (int) rowMap.get(val));
+            assertEquals(0, (int) rowMap.get(val));
         }
     }
 
@@ -207,7 +207,7 @@ public class GridTest {
         solveOneThroughNine(grid.columnItr(1));
         columnMap = grid.getColumnCands(1);
         for(int val = 1; val <= 9; val++){
-            assertEquals(1, (int) columnMap.get(val));
+            assertEquals(0, (int) columnMap.get(val));
         }
     }
 
@@ -235,7 +235,7 @@ public class GridTest {
         solveOneThroughNine(grid.boxItr(3, 3));
         boxMap = grid.getBoxCands(3, 3);
         for(int val = 1; val <= 9; val++){
-            assertEquals(1, (int) boxMap.get(val));
+            assertEquals(0, (int) boxMap.get(val));
         }
     }
 
