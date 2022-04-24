@@ -121,6 +121,4 @@ public class QueueSetTest {
             assertEquals(i, (int) intQueue.remove());
         }
     }
-
-    //Todo: Add all
 }

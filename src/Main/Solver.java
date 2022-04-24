@@ -44,6 +44,7 @@ public class Solver {
 
             if(!grid.isSolved(row, column)){
                 onlyCandidateLeft(row, column, changedCoords);
+                nakedCandidatePair(row, column, changedCoords);
                 checkRep();
             }
         }
@@ -102,8 +103,8 @@ public class Solver {
     /**
      * Checks for a cell within the given row, column, or local box that is the only
      * cell with a given candidate in that row, column, or box and solves it to that candidate
-     * @param row row of cell
-     * @param column column of cell
+     * @param row local row to be checked
+     * @param column local column to be checked
      * @param changedCoords a queue of coords. All changed cells will have their coords
      *        added to changedCoords
      * @return true if a change was made
@@ -142,7 +143,50 @@ public class Solver {
         return didChange;
     }
 
-    public boolean nakedCandidate(int row, int column, Queue<Integer> changedCoords){
+    /**
+     * Checks for two cells in a local container that have two candidates which are the same.
+     * This is a naked pair. Removes those candidates from the rest of the container.
+     * @param row local row to be checked
+     * @param column local column to be checked
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true if a change was made
+     */
+    public boolean nakedCandidatePair(int row, int column, Queue<Integer> changedCoords){
+        return
+            nakedCandidatePair(grid.getRowCells(row), changedCoords) |
+            nakedCandidatePair(grid.getColumnCells(column), changedCoords) |
+            nakedCandidatePair(grid.getBoxCells(row, column), changedCoords);
+    }
+
+    /**
+     * Checks for two cells in a local container that have two candidates which are the same.
+     * This is a naked pair. Removes those candidates from the rest of the container.
+     * @param cells a list of cells of the container to be checked
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true if a change was made
+     */
+    private boolean nakedCandidatePair(List<Cell> cells, Queue<Integer> changedCoords){
+        List<Cell> twoCands = keepCandRange(cells, 2, 2);
+        List<Cell> moreThanTwoCands = keepCandRange(cells, 3, 9);
+        for(int i = 0; i < twoCands.size(); i++){
+            Cell one = twoCands.get(i);
+            for(int j = i + 1; j < twoCands.size(); j++){
+                Cell two = twoCands.get(j);
+                //If two distinct cells have same candidate pair
+                if(one.equals(two)){
+                    for(Cell cell: moreThanTwoCands){
+                        boolean didChange = cell.removeAll(twoCands.get(i).getCands());
+                        if(didChange && cell.isSolved()){
+                            removeRookBox(cell.getRow(), cell.getColumn(), changedCoords);
+                        } else if(didChange){
+                            changedCoords.add(cell.getCoord());
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -172,6 +216,23 @@ public class Solver {
 
     public boolean isValid(){
         return false;
+    }
+
+    /**
+     * Removes all solved cells and cells with more than maxCands or less than minCands candidates
+     * from a list of cells
+     * @param cells the list of cells for cells to be removed from
+     * @param minCands the minimum number of cands to remain in the list
+     * @param maxCands the maximum number of cands to remain in the list
+     */
+    private List<Cell> keepCandRange(List<Cell> cells, int minCands, int maxCands){
+        List<Cell> kept = new ArrayList<>();
+        for(Cell cell: cells){
+            if(cell.isSolved() && cell.size() <= maxCands && cell.size() >= minCands){
+                kept.add(cell);
+            }
+        }
+        return kept;
     }
 
     //Todo: add a check rep for if the current grid is valid

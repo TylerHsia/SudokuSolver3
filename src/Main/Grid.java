@@ -207,7 +207,7 @@ public class Grid implements Iterable<Cell> {
      * @param row the row of the cells to be returned
      * @return the list of all cells in a given row
      */
-    private List<Cell> getRowCells(int row){
+    public List<Cell> getRowCells(int row){
         List<Cell> rCells = new ArrayList<>();
         for(int c = 0; c < 9; c++){
             rCells.add(getCell(row, c));
@@ -220,7 +220,7 @@ public class Grid implements Iterable<Cell> {
      * @param column the column of the cells to be returned
      * @return the list of all cells in a given column
      */
-    private List<Cell> getColumnCells(int column){
+    public List<Cell> getColumnCells(int column){
         List<Cell> cCells = new ArrayList<>();
         for(int r = 0; r < 9; r++){
             cCells.add(getCell(r, column));
@@ -234,7 +234,7 @@ public class Grid implements Iterable<Cell> {
      * @param column a column in the box to be looked at
      * @return the list of all cells values in a given box
      */
-    private List<Cell> getBoxCells(int row, int column){
+    public List<Cell> getBoxCells(int row, int column){
         List<Cell> bCells = new ArrayList<>();
         int rX = row / 3;
         int cX = column / 3;

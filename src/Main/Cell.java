@@ -85,6 +85,19 @@ public class Cell {
         return removed;
     }
 
+    /**
+     * Removes all values in cands from this cell's candidates
+     * @param cands the candidates to be removed
+     * @return true iff at least one candidate was removed
+     */
+    public boolean removeAll(Set<Integer> cands) {
+        boolean didChange = false;
+        for(int cand: cands){
+            didChange |= remove(cand);
+        }
+        return didChange;
+    }
+
 
     /**
      *
