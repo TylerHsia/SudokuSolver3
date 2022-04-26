@@ -34,7 +34,7 @@ public class Solver {
     public boolean solve(){
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
-                removeRookBox(r, c, changedCoords);
+                nakedSingle(r, c, changedCoords);
             }
         }
         while(!grid.isSolved() && !changedCoords.isEmpty()){
@@ -43,7 +43,7 @@ public class Solver {
             int column = changed % 9;
 
             if(!grid.isSolved(row, column)){
-                onlyCandidateLeft(row, column, changedCoords);
+                hiddenSingle(row, column, changedCoords);
                 nakedCandidatePair(row, column, changedCoords);
                 checkRep();
             }
@@ -60,7 +60,7 @@ public class Solver {
      *        added to changedCoords
      * @return true if a change was made
      */
-    public boolean removeRookBox(int row, int column, Queue<Integer> changedCoords){
+    public boolean nakedSingle(int row, int column, Queue<Integer> changedCoords){
         boolean didChange = false;
         if(grid.isSolved(row, column) && !removedRookBox.contains(row * 9 + column)){
             removedRookBox.add(row * 9 + column);
@@ -73,7 +73,7 @@ public class Solver {
             changedCoords.addAll(changed);
             didChange = !changedCoords.isEmpty();
             for(int coord: changed){
-                removeRookBox(coord / 9, coord % 9, changedCoords);
+                nakedSingle(coord / 9, coord % 9, changedCoords);
             }
         }
         return didChange;
@@ -109,11 +109,11 @@ public class Solver {
      *        added to changedCoords
      * @return true if a change was made
      */
-    public boolean onlyCandidateLeft(int row, int column, Queue<Integer> changedCoords){
+    public boolean hiddenSingle(int row, int column, Queue<Integer> changedCoords){
         return
-            onlyCandidateLeft(grid.rowItr(row), grid.getRowCands(row), changedCoords) |
-            onlyCandidateLeft(grid.columnItr(column), grid.getColumnCands(column), changedCoords) |
-            onlyCandidateLeft(grid.boxItr(row, column), grid.getBoxCands(row, column), changedCoords);
+            hiddenSingle(grid.rowItr(row), grid.getRowCands(row), changedCoords) |
+            hiddenSingle(grid.columnItr(column), grid.getColumnCands(column), changedCoords) |
+            hiddenSingle(grid.boxItr(row, column), grid.getBoxCands(row, column), changedCoords);
     }
 
     /**
@@ -125,7 +125,7 @@ public class Solver {
      *        added to changedCoords
      * @return true if a change was made
      */
-    private boolean onlyCandidateLeft(Iterator<Cell> itr, Map<Integer, Integer> frequency, Queue<Integer> changedCoords){
+    private boolean hiddenSingle(Iterator<Cell> itr, Map<Integer, Integer> frequency, Queue<Integer> changedCoords){
         boolean didChange = false;
         for(int cand: frequency.keySet()){
             if(frequency.get(cand) == 1){
@@ -133,7 +133,7 @@ public class Solver {
                     Cell cell = itr.next();
                     if(cell.contains(cand)){
                         cell.solve(cand);
-                        removeRookBox(cell.getRow(), cell.getColumn(), changedCoords);
+                        nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
                         didChange = true;
                         break;
                     }
@@ -179,7 +179,7 @@ public class Solver {
                     for(Cell cell: moreThanTwoCands){
                         boolean didChange = cell.removeAll(twoCands.get(i).getCands());
                         if(didChange && cell.isSolved()){
-                            removeRookBox(cell.getRow(), cell.getColumn(), changedCoords);
+                            nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
                         } else if(didChange){
                             changedCoords.add(cell.getCoord());
                         }
@@ -190,7 +190,15 @@ public class Solver {
         return false;
     }
 
-    public boolean hiddenCandidate(int row, int column, Queue<Integer> changedCoords){
+    public boolean nakedCandidateN(int row, int column, int n, Queue<Integer> changedCoords){
+        return false;
+    }
+
+    public boolean hiddenCandidatePair(int row, int column, Queue<Integer> changedCoords){
+        return false;
+    }
+
+    public boolean hiddenCandidateN(int row, int column, int n, Queue<Integer> changedCoords){
         return false;
     }
 
