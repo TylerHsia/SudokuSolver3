@@ -183,7 +183,7 @@ public class Grid implements Iterable<Cell> {
     /**
      * Returns a map of each value 1-9 mapped to the number of times it appears
      * as a candidate in all of the given cells. If a cell only has one candidate,
-     * that candidate is includes in the sums
+     * that candidate is not included in the sums
      * @param cells the list of cells whose candidates will be summed
      * @return a map of 1-9 to the number of times they are candidates in cells
      */
@@ -252,7 +252,7 @@ public class Grid implements Iterable<Cell> {
      * @param column the column of the Cell to be returned
      * @return the Cell at the given position in this
      */
-    private Cell getCell(int row, int column){
+    public Cell getCell(int row, int column){
         return cells[row * 9 + column];
     }
 

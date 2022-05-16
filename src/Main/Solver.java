@@ -51,6 +51,42 @@ public class Solver {
         return grid.isSolved();
     }
 
+    private boolean removeAndCallNaked(int row, int column, int val, Queue<Integer> changedCoords){
+        return removeAndCallNaked(grid.getCell(row, column), val, changedCoords);
+    }
+
+    private boolean removeAndCallNaked(Cell cell, int val, Queue<Integer> changedCoords){
+        if(cell.remove(val)){
+            changedCoords.add(cell.getCoord());
+            if(cell.isSolved()){
+                nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeAllAndCallNaked(int row, int column, Collection<Integer> vals, Queue<Integer> changedCoords){
+        return removeAllAndCallNaked(grid.getCell(row, column), vals, changedCoords);
+    }
+
+    private boolean removeAllAndCallNaked(Cell cell, Collection<Integer> vals, Queue<Integer> changedCoords){
+        boolean didChange = false;
+        for(Integer val: vals){
+            didChange |= removeAndCallNaked(cell, val, changedCoords);
+        }
+        return didChange;
+    }
+
+    private void solveAndCallNaked(int row, int column, int val, Queue<Integer> changedCoords){
+        solveAndCallNaked(grid.getCell(row, column), val, changedCoords);
+    }
+
+    private void solveAndCallNaked(Cell cell, int val, Queue<Integer> changedCoords){
+        cell.solve(val);
+        nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
+    }
+
     /**
      * If the given cell is solved, removes that cells value as a candidate
      * from cells in row, column, and box
@@ -65,16 +101,10 @@ public class Solver {
         if(grid.isSolved(row, column) && !removedRookBox.contains(row * 9 + column)){
             removedRookBox.add(row * 9 + column);
             int val = grid.getVal(row, column);
-            Queue<Integer> changed = new QueueSet<Integer>();
-            removeFromItr(grid.rowItr(row), val, changed);
-            removeFromItr(grid.columnItr(column), val, changed);
-            removeFromItr(grid.boxItr(row, column), val, changed);
-
-            changedCoords.addAll(changed);
-            didChange = !changedCoords.isEmpty();
-            for(int coord: changed){
-                nakedSingle(coord / 9, coord % 9, changedCoords);
-            }
+            return
+                removeFromItr(grid.rowItr(row), val, changedCoords) |
+                removeFromItr(grid.columnItr(column), val, changedCoords) |
+                removeFromItr(grid.boxItr(row, column), val, changedCoords);
         }
         return didChange;
     }
@@ -90,11 +120,7 @@ public class Solver {
         while(itr.hasNext()){
             Cell next = itr.next();
             if(!next.isSolved()){
-                boolean removed = next.remove(value);
-                if(removed){
-                    didChange = true;
-                    changedCoords.add(next.getCoord());
-                }
+                didChange |= removeAndCallNaked(next, value, changedCoords);
             }
         }
         return didChange;
@@ -132,8 +158,7 @@ public class Solver {
                 while(itr.hasNext()) {
                     Cell cell = itr.next();
                     if(cell.contains(cand)){
-                        cell.solve(cand);
-                        nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
+                        solveAndCallNaked(cell, cand, changedCoords);
                         didChange = true;
                         break;
                     }
@@ -168,27 +193,39 @@ public class Solver {
      * @return true if a change was made
      */
     private boolean nakedCandidatePair(List<Cell> cells, Queue<Integer> changedCoords){
-        List<Cell> twoCands = keepCandRange(cells, 2, 2);
-        List<Cell> moreThanTwoCands = keepCandRange(cells, 3, 9);
+        List<Cell> unsolved = keepCandRange(cells, 2, 9);
+        List<Cell> twoCands = keepCandRange(unsolved, 2, 2);
+        boolean didChange = false;
         for(int i = 0; i < twoCands.size(); i++){
             Cell one = twoCands.get(i);
             for(int j = i + 1; j < twoCands.size(); j++){
                 Cell two = twoCands.get(j);
                 //If two distinct cells have same candidate pair
                 if(one.equals(two)){
-                    for(Cell cell: moreThanTwoCands){
-                        boolean didChange = cell.removeAll(twoCands.get(i).getCands());
-                        if(didChange && cell.isSolved()){
-                            nakedSingle(cell.getRow(), cell.getColumn(), changedCoords);
-                        } else if(didChange){
-                            changedCoords.add(cell.getCoord());
+                    for(Cell cell: unsolved){
+                        if(cell != one && cell != two){
+                            didChange |= removeAllAndCallNaked(cell, twoCands.get(i).getCands(), changedCoords);
                         }
                     }
                 }
             }
         }
+        return didChange;
+    }
+
+    public boolean nakedCandidateTriple(int row, int column, Queue<Integer> changedCoords){
+        return
+                nakedCandidateTriple(grid.getRowCells(row), changedCoords) |
+                nakedCandidateTriple(grid.getColumnCells(column), changedCoords) |
+                nakedCandidateTriple(grid.getBoxCells(row, column), changedCoords);
+    }
+
+    private boolean nakedCandidateTriple(List<Cell> cells, Queue<Integer> changedCoords){
+        StackSet stackSet = new StackSet();
+
         return false;
     }
+
 
     public boolean nakedCandidateN(int row, int column, int n, Queue<Integer> changedCoords){
         return false;

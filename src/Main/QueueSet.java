@@ -53,7 +53,7 @@ public class QueueSet<E> implements Queue<E> {
 
     @Override
     public Object[] toArray() {
-        throw new UnsupportedOperationException();
+        return elementQueue.toArray();
     }
 
     @Override
