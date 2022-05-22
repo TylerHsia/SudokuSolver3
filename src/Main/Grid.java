@@ -269,6 +269,22 @@ public class Grid implements Iterable<Cell> {
             }
             stringRepresentation.append("\n");
         }
+        stringRepresentation.append("\n\n\n");
+
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                Set<Integer> cands = getCands(r, c);
+                for(int i = 1; i <= 9; i++){
+                    if(cands.contains(i)){
+                        stringRepresentation.append(i);
+                    } else {
+                        stringRepresentation.append(" ");
+                    }
+                }
+                stringRepresentation.append("|");
+            }
+            stringRepresentation.append("\n");
+        }
         return stringRepresentation.toString();
     }
 

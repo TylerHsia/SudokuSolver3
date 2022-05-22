@@ -44,7 +44,9 @@ public class Solver {
 
             if(!grid.isSolved(row, column)){
                 hiddenSingle(row, column, changedCoords);
-                nakedCandidatePair(row, column, changedCoords);
+                for(int n = 2; n <= 8; n++){ //Todo: change back to n <= 8
+                    nakedCandidateN(row, column, n, changedCoords);
+                }
                 checkRep();
             }
         }
@@ -222,13 +224,171 @@ public class Solver {
 
     private boolean nakedCandidateTriple(List<Cell> cells, Queue<Integer> changedCoords){
         StackSet stackSet = new StackSet();
+        List<Cell> unsolved = keepCandRange(cells, 2, 9);
+        List<Cell> threeCands = keepCandRange(unsolved, 2, 2);
 
-        return false;
+        //if not enough number of cells with 2 to 3 candidates or not enough unsolved cells such that
+        //no change would be made
+        if(threeCands.size() < 3 || unsolved.size() < 4){
+            return false;
+        }
+
+        boolean didChange = false;
+        for(int i = 0; i < threeCands.size(); i++){
+            Cell one = threeCands.get(i);
+            stackSet.push(one.getCands());
+            for(int j = i + 1; j < threeCands.size(); j++){
+                Cell two = threeCands.get(j);
+                stackSet.push(two.getCands());
+                for(int k = j + 1; k < threeCands.size(); k++) {
+                    Cell three = threeCands.get(k);
+                    stackSet.push(three.getCands());
+                    if(stackSet.size() == 3){
+                        for(Cell cell: unsolved){
+                            if(cell != one && cell != two && cell != three){
+                                removeAllAndCallNaked(cell, stackSet.asSet(), changedCoords);
+                            }
+                        }
+                    }
+                    stackSet.pop();
+                }
+                stackSet.pop();
+            }
+            stackSet.pop();
+        }
+        return didChange;
     }
 
 
+    /**
+     * Checks for two cells in a local container that have two candidates which are the same.
+     * This is a naked n-set. Removes those candidates from the rest of the container.
+     * @param row the local row to be checked
+     * @param column the local column to be checked
+     * @param n the size of set of naked candidates to be checked
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true if a change was made
+     */
     public boolean nakedCandidateN(int row, int column, int n, Queue<Integer> changedCoords){
-        return false;
+        return
+                nakedCandidateN(grid.getRowCells(row), n, changedCoords) |
+                nakedCandidateN(grid.getColumnCells(column), n, changedCoords) |
+                nakedCandidateN(grid.getBoxCells(row, column), n, changedCoords);
+    }
+
+    /**
+     * Sets up and calls the recursive naked candidate finder for naked candidate sets
+     * of size n
+     * @param cells a list of cells for the naked candidate to be found in
+     * @param n the size of naked candidate sets
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
+    private boolean nakedCandidateN(List<Cell> cells, int n, Queue<Integer> changedCoords){
+        StackSet stackSet = new StackSet();
+        List<Cell> unsolved = keepCandRange(cells, 2, 9);
+        List<Cell> nCands = keepCandRange(unsolved, 2, n);
+
+        //if not enough number of cells with 2 to n candidates or not enough unsolved cells such that
+        //no change would be made
+        if(nCands.size() < n || unsolved.size() < n + 1){
+            return false;
+        }
+        return nakedCandidateNRecursiveHelper(unsolved, nCands, stackSet, n, changedCoords, new Stack<>(), 1, 0);
+    }
+
+    /**
+     * Recursive checker for naked candidate sets
+     * @param unsolved The list of unsolved cells in the local group
+     * @param nCands the list of unsolved cells in the local group with [2,n] candidates
+     * @param stackSet a set of cands that are in the current set of cells being looked at
+     * @param n the size of the naked candidate set to be checked
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @param cellsOnStack the cells that have had their candidates put in stackSet
+     *                     by this method
+     * @return true iff a change was made
+     */
+    private boolean nakedCandidateNRecursiveHelper(List<Cell> unsolved, List<Cell> nCands,
+                                                   StackSet stackSet, int n, Queue<Integer> changedCoords,
+                                                   Stack<Cell> cellsOnStack, int depth, int start){
+        //queue version, works
+        /*
+        boolean didChange = false;
+        while(!nCands.isEmpty()){
+            Cell next = nCands.remove();
+            cellsOnStack.push(next);
+            stackSet.push(next.getCands());
+            if(n == 1){
+                if(stackSet.asSet().size() == stackSet.size()){
+                    for(Cell cell: unsolved){
+                        if(!cellsOnStack.contains(cell)){
+                            didChange |= removeAllAndCallNaked(cell, stackSet.asSet(), changedCoords);
+                        }
+                    }
+                }
+            } else if (stackSet.size() <= n + cellsOnStack.size()){
+                didChange |= nakedCandidateNRecursiveHelper(unsolved, new LinkedList(nCands), stackSet, n - 1, changedCoords, cellsOnStack, 0, 0);
+            }
+            //nCands.add(next);
+            stackSet.pop();
+            cellsOnStack.pop();
+        }
+        return didChange;
+
+         */
+
+
+
+
+
+        boolean didChange = false;
+        for(int i = start; i < nCands.size(); i++) {
+            cellsOnStack.push(nCands.get(i));
+            stackSet.push(nCands.get(i).getCands());
+            if(depth == n){
+                if(stackSet.asSet().size() == stackSet.size()){
+                    for(Cell cell: unsolved){
+                        if(!cellsOnStack.contains(cell)){
+                            didChange |= removeAllAndCallNaked(cell, stackSet.asSet(), changedCoords);
+                        }
+                    }
+                }
+            } else if (stackSet.size() <= n){
+                didChange |= nakedCandidateNRecursiveHelper(unsolved, nCands, stackSet, n, changedCoords, cellsOnStack, depth + 1, start + 1);
+            }
+            start++;
+            stackSet.pop();
+            cellsOnStack.pop();
+        }
+        return didChange;
+
+
+
+        /* first version
+        boolean didChange = false;
+        for(int i = cellsOnStack.size(); i < nCands.size(); i++) {
+            cellsOnStack.push(nCands.get(i));
+            stackSet.push(nCands.get(i).getCands());
+            if(n == 1){
+                if(stackSet.asSet().size() == stackSet.size()){
+                    for(Cell cell: unsolved){
+                        if(!cellsOnStack.contains(cell)){
+                            didChange |= removeAllAndCallNaked(cell, stackSet.asSet(), changedCoords);
+                        }
+                    }
+                }
+            } else if (stackSet.size() <= n + cellsOnStack.size()){ //Todo: change to else if (stackSet.size() <= n) - so it doesn't check further if the number of candidates is already too great to be a naked set
+                didChange |= nakedCandidateNRecursiveHelper(unsolved, nCands, stackSet, n - 1, changedCoords, cellsOnStack);
+            }
+            stackSet.pop();
+            cellsOnStack.pop();
+        }
+        return didChange;
+         */
+
     }
 
     public boolean hiddenCandidatePair(int row, int column, Queue<Integer> changedCoords){
@@ -273,7 +433,7 @@ public class Solver {
     private List<Cell> keepCandRange(List<Cell> cells, int minCands, int maxCands){
         List<Cell> kept = new ArrayList<>();
         for(Cell cell: cells){
-            if(cell.isSolved() && cell.size() <= maxCands && cell.size() >= minCands){
+            if(!cell.isSolved() && cell.size() <= maxCands && cell.size() >= minCands){
                 kept.add(cell);
             }
         }

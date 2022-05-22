@@ -78,6 +78,59 @@ public class SolverTest {
     }
 
     @Test
+    public void test_naked_n(){
+        //Test convenient 2 - 8 n
+        for(int j = 1; j < 8; j++){
+            for(int i = 0; i < 9 - j; i++){
+                grid.removeCand(0, i, j);
+            }
+            solver.nakedCandidateN(0, 0, 9 - j, changed);
+            assertEquals(j, grid.getVal(0, 9 - j));
+        }
+
+        //test naked pair non adjacent
+        setUpVariables();
+        for(int i = 3; i <= 9; i++){
+            grid.removeCand(0, 0, i);
+            grid.removeCand(0, 2, i);
+        }
+        solver.nakedCandidateN(0, 0, 2, changed);
+        for(int c = 0; c < 9; c++){
+            if(c != 0 && c != 2){
+                assertFalse(grid.getCands(0, c).contains(2));
+                assertFalse(grid.getCands(0, c).contains(1));
+            }
+        }
+
+        //test failure case of dif2
+        setUpVariables();
+        keepCands(grid.getCell(0, 0), 2, 6, 9);
+        keepCands(grid.getCell(0, 2), 6, 9);
+        keepCands(grid.getCell(0, 3), 4, 6);
+        keepCands(grid.getCell(0, 6), 2, 4, 6);
+        solver.nakedCandidateN(0, 0, 2, changed);
+        assertTrue(changed.isEmpty());
+
+        //Test that it continues past first permutation
+        setUpVariables();
+        keepCands(grid.getCell(0, 0), 2, 6);
+        keepCands(grid.getCell(0, 2), 5, 7);
+        keepCands(grid.getCell(0, 3), 5, 7);
+        solver.nakedCandidateN(0, 0, 2, changed);
+        assertFalse(changed.isEmpty());
+    }
+
+    private void keepCands(Cell cell, Integer... cands){
+        Set<Integer> keep = new HashSet<>(Arrays.asList(cands));
+        for(int i = 1; i <= 9; i++){
+            if(!keep.contains(i)){
+                cell.remove(i);
+            }
+        }
+    }
+
+
+    @Test
     public void test_dif_1(){
         sudokScanner = initializeScanner(difFiles[1]);
         while(sudokScanner.hasNext()){
@@ -88,15 +141,24 @@ public class SolverTest {
     }
 
     @Test
-    public void test_dif_2(){
+    public void test_dif_2() {
         sudokScanner = initializeScanner(difFiles[2]);
-        while(sudokScanner.hasNext()){
+        while (sudokScanner.hasNext()) {
             grid = new Grid(sudokScanner.next());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
         }
     }
-    //Todo: test for removeRookBox
+
+    @Test
+    public void test_dif_3() {
+        sudokScanner = initializeScanner(difFiles[3]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.next());
+            Solver solver = new Solver(grid);
+            assertTrue(solver.solve());
+        }
+    }
 
     private Scanner initializeScanner(String fileName){
         try{
