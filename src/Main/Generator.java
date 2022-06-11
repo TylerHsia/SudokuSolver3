@@ -3,6 +3,11 @@ import javax.print.attribute.standard.MediaSize;
 import java.util.*;
 
 public class Generator {
+    /**
+     * Returns whether the given grid has exactly one solution
+     * @param grid the grid to be checked
+     * @return true iff the grid has exactly one solution
+     */
     public static boolean isValid(Grid grid){
         Solver solver = new Solver(grid);
         solver.solve();
@@ -14,6 +19,13 @@ public class Generator {
         return isValid(grid, grid.getCells(), 0);
     }
 
+    /**
+     * Returns whether the given grid has exactly one solution
+     * @param grid the grid to be checked
+     * @param cells the list of all cells in the grid
+     * @param
+     * @return true iff the grid has exactly one solution
+     */
     private static boolean isValid(Grid grid, List<Cell> cells, int index){
         for(int i = index; i < 81; i++){
             Cell cell = cells.get(i);
@@ -29,7 +41,7 @@ public class Generator {
                     } catch(Throwable e){
                         continue;
                     }
-                    if(isValid(copy, cells, i + 1)){
+                    if(isValid(copy, copy.getCells(), i + 1)){
                         if(solvedOne){
                             return false;
                         } else {
@@ -39,11 +51,14 @@ public class Generator {
                 }
             }
         }
-
         return true;
     }
 
-
+    /**
+     * Returns whether the given grid has exactly one solution
+     * @param grid the grid to be checked
+     * @return true iff the grid has exactly one solution
+     */
     public static boolean isValidSlow(Grid grid){
         Solver solver = new Solver(grid);
         solver.runNakedSingle();
@@ -76,6 +91,11 @@ public class Generator {
         return true;
     }
 
+    /**
+     * Solves the given grid by brute force
+     * @param grid the grid to be solved
+     * @return true if the grid was solved
+     */
     public static boolean bruteForceSolver(Grid grid){
         int[][] intGrid = new int[9][9];
         for(int r = 0; r < 9; r++){
@@ -92,6 +112,11 @@ public class Generator {
         return grid.isSolved();
     }
 
+    /**
+     * Solves the given grid by brute force
+     * @param grid the grid to be solved
+     * @return true if the grid was solved
+     */
     private static boolean bruteForceSolver(int[][] grid){
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
@@ -113,6 +138,15 @@ public class Generator {
         return true;
     }
 
+    /**
+     * Checker for if a candidate can be placed in a certain position in a grid
+     * @param grid the grid to be checked
+     * @param cand the cand to be checked
+     * @param row the row to be checked
+     * @param column the column to be checked
+     * @return true iff the cand can be placed in the given grid's row and column
+     *         without being a duplicate
+     */
     private static boolean isValidPlacement(int[][] grid, int cand, int row, int column){
         for(int r = 0; r < 9; r++){
             if(grid[r][column] == cand){
@@ -130,85 +164,6 @@ public class Generator {
             for(int c = bc; c < bc + 3; c++){
                 if(grid[r][c] == cand){
                     return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-    public static boolean isValidSlowOld(Grid grid){
-        if(grid.isSolved()){
-            return true;
-        } else if (grid.hasDuplicate()){
-            return false;
-        }
-        for(int r = 0; r < 9; r++){
-            for(int c = 0; c < 9; c++){
-                Cell cell = grid.getCell(r, c);
-                if(!cell.isSolved()){
-                    boolean solvedOne = false;
-                    Set<Integer> cands = cell.getCands();
-                    for(int cand: cands){
-                        Grid copy = grid.clone();
-                        copy.solveCell(r, c, cand);
-                        Solver solver = new Solver(copy);
-                        try{
-                            solver.runNakedSingle();
-                        } catch (Throwable e){
-                            continue;
-                        }
-                        if(isValidSlowOld(copy)){
-                            if(solvedOne){
-                                return false;
-                            } else {
-                                solvedOne = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    public static boolean isValidOld(Grid grid) {
-        if(true){
-            Solver solver = new Solver(grid);
-            solver.runNakedSingle();
-            return isValidSlowOld(grid);
-        }
-        if(grid.isSolved()){
-            return true;
-        } else if (grid.hasDuplicate()){
-            return false;
-        }
-        for(int r = 0; r < 9; r++){
-            for(int c = 0; c < 9; c++){
-                if(r== 1 && c == 6){
-                    System.out.println(c);
-                }
-                Cell cell = grid.getCell(r, c);
-                if(!cell.isSolved()){
-                    boolean solvedOne = false;
-                    Set<Integer> cands = cell.getCands();
-                    for(int cand: cands){
-                        Grid copy = grid.clone();
-                        copy.solveCell(r, c, cand);
-                        Solver solver = new Solver(copy);
-                        try{
-                            solver.solve();
-                        } catch (Throwable e){
-                            continue;
-                        }
-                        if(isValidOld(copy)){
-                            if(solvedOne){
-                                return false;
-                            } else {
-                                solvedOne = true;
-                            }
-                        }
-                    }
                 }
             }
         }

@@ -36,7 +36,7 @@ public class GeneratorTest {
             while (sudokScanner.hasNext()) {
                 grid = new Grid(sudokScanner.next());
                 System.out.println(grid);
-                assertTrue(Generator.isValidSlow(grid));
+                assertTrue(Generator.isValid(grid));
             }
         }
     }
