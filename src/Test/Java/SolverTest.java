@@ -25,7 +25,7 @@ public class SolverTest {
         grid = new Grid();
         cands = allCands();
         testCasesFile = "testCases.txt";
-        difFiles = new String[]{null, "diff1.txt", "diff2.txt", "diff3.txt", "diff4.txt", "diff5.txt"};
+        difFiles = new String[]{null, "diff1.txt", "diff2.txt", "diff3.txt", "diff4.txt", "diff5.txt", "oldTests.txt"};
         solver = new Solver(grid);
         changed = new QueueSet<Integer>();
     }
@@ -157,6 +157,37 @@ public class SolverTest {
             grid = new Grid(sudokScanner.next());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
+        }
+    }
+
+    @Test
+    public void test_dif_4() {
+        sudokScanner = initializeScanner(difFiles[4]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.next());
+            Solver solver = new Solver(grid);
+            assertTrue(solver.solve());
+        }
+    }
+
+    @Test
+    public void test_23_cases() {
+        sudokScanner = initializeScanner(difFiles[6]);
+        int i = 1;
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.nextLine());
+            if(!(i != 5 && i != 9 && i != 13 && i != 20 && i != 22 && i != 23)){
+                i++;
+                continue;
+            }
+            Solver solver = new Solver(grid);
+            boolean solved = solver.solve();
+            if(solved){
+                //System.out.println("Solved " + i);
+            } else {
+                System.out.println("Failed " + i);
+            }
+            i++;
         }
     }
 

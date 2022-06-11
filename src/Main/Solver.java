@@ -47,10 +47,22 @@ public class Solver {
                 for(int n = 2; n <= 7; n++){
                     nakedCandidateN(row, column, n, changedCoords);
                 }
+                pointingCandidates(row, column, changedCoords);
+                claimingCandidates(row, column, changedCoords);
                 checkRep();
             }
         }
         return grid.isSolved();
+    }
+
+    public boolean runNakedSingle(){
+        boolean changed = false;
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                changed |= nakedSingle(r, c, changedCoords);
+            }
+        }
+        return changed;
     }
 
     private boolean removeAndCallNaked(int row, int column, int val, Queue<Integer> changedCoords){
@@ -262,13 +274,106 @@ public class Solver {
         return false;
     }
 
-    public boolean candidateLines(int row, int column, Queue<Integer> changedCoords){
-        return false;
+    /**
+     * If in a box all candidates of a certain digit are confined to a row or column,
+     * that digit cannot appear outside of that block in that row or column.
+     * @param row the row of the local box to be looked at
+     * @param column the column of the local box to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
+    public boolean pointingCandidates(int row, int column, Queue<Integer> changedCoords){
+        List<Cell> unsolvedInBox = keepCandRange(grid.getBoxCells(row, column), 2, 9);
+        Map<Integer, Integer> frequency = grid.getBoxCands(row, column);
+        boolean didChange = false;
+        for(int cand = 1; cand <= 9; cand++){
+            //only look at cands that appear 2 or three times in the box
+            if(frequency.get(cand) == 2 || frequency.get(cand) == 3){
+                Set<Integer> rowSet = new HashSet<>(9);
+                Set<Integer> columnSet = new HashSet<>(9);
+                for(Cell cell: unsolvedInBox){
+                    if(cell.contains(cand)){
+                        rowSet.add(cell.getRow());
+                        columnSet.add(cell.getColumn());
+                    }
+                }
+                //if found a pointing set in the row
+                if(rowSet.size() == 1){
+                    int r = rowSet.iterator().next();
+                    for(int c = 0; c < 9; c++){
+                        if(!columnSet.contains(c)){
+                            didChange |= removeAndCallNaked(r, c, cand, changedCoords);
+                        }
+                    }
+                }
+                //if found a pointing set in the column
+                if(columnSet.size() == 1){
+                    int c = columnSet.iterator().next();
+                    for(int r = 0; r < 9; r++){
+                        if(!rowSet.contains(r)){
+                            didChange |= removeAndCallNaked(r, c, cand, changedCoords);
+                        }
+                    }
+                }
+            }
+        }
+        return didChange;
     }
 
-    public boolean pointingPairRookToBox(int row, int column, Queue<Integer> changedCoords){
-        return false;
+    /**
+     * If in a column or row, all candidates of a certain digit are confined in a single
+     * box, that digit cannot appear outside of that row or column in that box
+     * @param row the row of the local box to be looked at
+     * @param column the column of the local box to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
+    public boolean claimingCandidates(int row, int column, Queue<Integer> changedCoords){
+        return
+                claimingCandidates(grid.getRowCells(row), grid.getRowCands(row), changedCoords) |
+                claimingCandidates(grid.getColumnCells(column), grid.getColumnCands(column), changedCoords);
     }
+
+    /**
+     * If in a column or row, all candidates of a certain digit are confined in a single
+     * box, that digit cannot appear outside of that row or column in that box.
+     * @param cells list of cells of a column or row to be looked at
+     * @param frequency map of candidate values to their frequency in that row or column
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
+    private boolean claimingCandidates(List<Cell> cells, Map<Integer, Integer> frequency, Queue<Integer> changedCoords){
+        List<Cell> unsolved = keepCandRange(cells, 2, 9);
+        boolean didChange = false;
+
+        for(int cand = 1; cand <= 9; cand++){
+            //only look at cands that appear 2 or three times in the group
+            if(frequency.get(cand) == 2 || frequency.get(cand) == 3){
+                Set<Integer> boxCoords = new HashSet<>(9);
+                Set<Cell> contains = new HashSet<>();
+                for(Cell cell: unsolved){
+                    if(cell.contains(cand)){
+                        contains.add(cell);
+                        boxCoords.add(cell.getColumn() / 3 + 3 * (cell.getRow() / 3));
+                    }
+                }
+                //if found a pointing set in the set
+                if(boxCoords.size() == 1){
+                    Cell contained = contains.iterator().next();
+                    for(Cell cell: grid.getBoxCells(contained.getRow(), contained.getColumn())){
+                        if(!contains.contains(cell)){
+                            didChange |= removeAndCallNaked(cell, cand, changedCoords);
+                        }
+                    }
+                }
+            }
+        }
+        return didChange;
+    }
+
 
     public boolean xWing(int row, int column, Queue<Integer> changedCoords){
         return false;
@@ -279,10 +384,6 @@ public class Solver {
     }
 
     public boolean bruteForce(){
-        return false;
-    }
-
-    public boolean isValid(){
         return false;
     }
 
@@ -302,6 +403,4 @@ public class Solver {
         }
         return kept;
     }
-
-    //Todo: add a check rep for if the current grid is valid
 }
