@@ -230,9 +230,21 @@ public class Grid implements Iterable<Cell> {
 
     /**
      * Returns the list of all cells in a given box
-     * @param row a row in the box to be looked at
-     * @param column a column in the box to be looked at
-     * @return the list of all cells values in a given box
+     * @return the list of all cells in a given box
+     */
+    public List<Cell> getCells(){
+        List<Cell> bCells = new ArrayList<>(81);
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                bCells.add(getCell(r, c));
+            }
+        }
+        return bCells;
+    }
+
+    /**
+     * Returns the list of all cells
+     * @return the list of all cells
      */
     public List<Cell> getBoxCells(int row, int column){
         List<Cell> bCells = new ArrayList<>();
@@ -386,5 +398,45 @@ public class Grid implements Iterable<Cell> {
      */
     public Iterator<Cell> iterator(){
         return Arrays.asList(cells).iterator();
+    }
+
+    /**
+     * Returns a deep clone of this grid
+     * @return a deep clone
+     */
+    public Grid clone(){
+        Grid copy = new Grid();
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                Cell cell = getCell(r, c);
+                for(int cand = 1; cand <= 9; cand++){
+                    if(!cell.contains(cand)){
+                        copy.removeCand(r, c, cand);
+                    }
+                }
+            }
+        }
+        return copy;
+    }
+
+    /**
+     * checks if this grid has the same candidates for all cells as the other grid
+     * @param other the other grid to be checked for equality
+     * @return true iff this grid and other have the same cells
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Grid)) {
+            return false;
+        }
+        Grid otherGrid = (Grid) other;
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if(!this.getCell(r, c).equals(otherGrid.getCell(r, c))){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
