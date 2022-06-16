@@ -145,6 +145,14 @@ public class Cell {
     }
 
     /**
+     * Sets the candidates of this to the given set
+     * @param cands the set of candidates for this to have
+     */
+    public void setCandidates(Set<Integer> cands){
+        this.candidates = cands;
+    }
+
+    /**
      * checks if this cell has the same candidates as another cell
      * @param other the other cell to be checked for equality
      * @return true iff this cell and other have the same candidates
