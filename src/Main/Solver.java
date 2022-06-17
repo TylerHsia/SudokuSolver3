@@ -32,11 +32,7 @@ public class Solver {
      * @return true if the grid was solved
      */
     public boolean solve(){
-        for(int r = 0; r < 9; r++){
-            for(int c = 0; c < 9; c++){
-                nakedSingle(r, c, changedCoords);
-            }
-        }
+        runNakedSingle(changedCoords);
         while(!grid.isSolved() && !changedCoords.isEmpty()){
             int changed = changedCoords.remove();
             int row = changed / 9;
@@ -55,7 +51,7 @@ public class Solver {
         return grid.isSolved();
     }
 
-    public boolean runNakedSingle(){
+    public boolean runNakedSingle(Queue<Integer> changedCoords){
         boolean changed = false;
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
@@ -183,7 +179,24 @@ public class Solver {
     }
 
     /**
-     * Checks for two cells in a local container that have two candidates which are the same.
+     * Checks for n cells in a local container that have n candidates which are the same.
+     * This is a naked n-set. Removes those candidates from the rest of the container.
+     * This is done for n of 2 through 5 inclusive
+     * @param row the local row to be checked
+     * @param column the local column to be checked
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true if a change was made
+     */
+    public boolean nakedCandidates(int row, int column, Queue<Integer> changedCoords){
+        return nakedCandidateN(row, column, 2, changedCoords)
+                | nakedCandidateN(row, column, 3, changedCoords)
+                | nakedCandidateN(row, column, 4, changedCoords)
+                | nakedCandidateN(row, column, 5, changedCoords);
+    }
+
+    /**
+     * Checks for n cells in a local container that have n candidates which are the same.
      * This is a naked n-set. Removes those candidates from the rest of the container.
      * @param row the local row to be checked
      * @param column the local column to be checked
@@ -268,6 +281,12 @@ public class Solver {
 
     public boolean hiddenCandidatePair(int row, int column, Queue<Integer> changedCoords){
         return false;
+    }
+
+    public boolean hiddenCandidates(int row, int column, Queue<Integer> changedCoords){
+        return hiddenCandidateN(row, column, 2, changedCoords)
+                | hiddenCandidateN(row, column, 3, changedCoords)
+                | hiddenCandidateN(row, column, 4, changedCoords);
     }
 
     public boolean hiddenCandidateN(int row, int column, int n, Queue<Integer> changedCoords){
@@ -379,7 +398,15 @@ public class Solver {
         return false;
     }
 
-    public boolean forcingChains(int row, int column, Queue<Integer> changedCoords){
+    public boolean xYWing(int row, int column, Queue<Integer> changedCoords){
+        return false;
+    }
+
+    public boolean basicFish(int row, int column, Queue<Integer> changedCoords){
+        return false;
+    }
+
+    public boolean forcingChains(int row, int column, int length, Queue<Integer> changedCoords){
         return false;
     }
 

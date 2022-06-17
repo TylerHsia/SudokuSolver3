@@ -4,8 +4,7 @@ import Main.*;
 import org.junit.Before;
 
 import java.io.File;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 
 import Main.Grid;
 import org.junit.Test;
@@ -51,11 +50,49 @@ public class GeneratorTest {
         }
     }
 
+    @Test
+    public void test_solve_with_methods() {
+        List<SolverFunction> methods = new ArrayList<>();
+        sudokScanner = initializeScanner(difFiles[1]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.nextLine());
+            assertTrue(Generator.solveWithMethods(grid, methods));
+        }
+
+        sudokScanner = initializeScanner(difFiles[2]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.nextLine());
+            Solver solver = new Solver(grid);
+            methods.add(solver::hiddenSingle);
+            assertTrue(Generator.solveWithMethods(grid, methods));
+        }
+
+        sudokScanner = initializeScanner(difFiles[3]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.nextLine());
+            Solver solver = new Solver(grid);
+            methods.add(solver::hiddenSingle);
+            methods.add(solver::nakedCandidates);
+            assertTrue(Generator.solveWithMethods(grid, methods));
+        }
+
+        sudokScanner = initializeScanner(difFiles[4]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.nextLine());
+            Solver solver = new Solver(grid);
+            methods.add(solver::hiddenSingle);
+            methods.add(solver::nakedCandidates);
+            methods.add(solver::claimingCandidates);
+            methods.add(solver::pointingCandidates);
+            assertTrue(Generator.solveWithMethods(grid, methods));
+        }
+    }
+
     private Scanner initializeScanner(String fileName){
         try{
             return new Scanner(new File("src/Test/text/" + fileName));
         } catch (Exception e){
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 }

@@ -61,7 +61,7 @@ public class Generator {
      */
     public static boolean isValidSlow(Grid grid){
         Solver solver = new Solver(grid);
-        solver.runNakedSingle();
+        solver.runNakedSingle(new LinkedList<>());
         if(grid.hasDuplicate()){
             return false;
         } else if(grid.numSolved() == 81){
@@ -89,6 +89,34 @@ public class Generator {
             }
         }
         return true;
+    }
+
+    /**
+     * Solver for the given grid with the list of solver methods.
+     * Naked singles is always run first, regardless of methods
+     * @param grid the grid to be solved
+     * @param methods the list of solving methods to be used on the grid
+     * @return true iff grid was solved
+     */
+    public static boolean solveWithMethods(Grid grid, List<SolverFunction> methods){
+        Queue<Integer> changedCoords = new QueueSet<Integer>();
+        for(int i = 0; i < 81; i++){
+            changedCoords.add(i);
+        }
+        Solver solver = new Solver(grid);
+        solver.runNakedSingle(changedCoords);
+        while(!grid.isSolved() && !changedCoords.isEmpty()){
+            int changed = changedCoords.remove();
+            int row = changed / 9;
+            int column = changed % 9;
+
+            if(!grid.isSolved(row, column)){
+                for(SolverFunction func: methods){
+                    func.solveMethod(row, column, changedCoords);
+                }
+            }
+        }
+        return grid.isSolved();
     }
 
     /**
