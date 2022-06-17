@@ -1,5 +1,6 @@
 package Main;
 
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.*;
 
 public class Solver {
@@ -45,6 +46,7 @@ public class Solver {
                 }
                 pointingCandidates(row, column, changedCoords);
                 claimingCandidates(row, column, changedCoords);
+                xWing(row, column, changedCoords);
                 checkRep();
             }
         }
@@ -393,9 +395,77 @@ public class Solver {
         return didChange;
     }
 
-
+    /**
+     * If in two columns, all candidates of a specific digit in both rows are contained
+     * in the columns, all candidates in the columns that are not part of the rows can be eliminated.
+     * Also true for switched rows and columns above.
+     * @param row one primary row to be looked at
+     * @param column one primary column to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
     public boolean xWing(int row, int column, Queue<Integer> changedCoords){
-        return false;
+        boolean didChange = xWingRows(grid, row, changedCoords);
+        Grid clockwise = Permuter.rotateClockwise(grid);
+        Solver clockwiseSolver = new Solver(clockwise);
+        didChange |= clockwiseSolver.xWingRows(clockwise, column, new QueueSet<Integer>());
+        mergeGrid(Permuter.rotateCounterClockwise(clockwise), changedCoords);
+        return didChange;
+    }
+
+    private boolean xWingRows(Grid grid, int row, Queue<Integer> changedCoords){
+        boolean didChange = false;
+        Map<Integer, Integer> frequency = grid.getRowCands(row);
+        for(int cand: frequency.keySet()){
+            if(frequency.get(cand) == 2){
+                //Rows will contain the two rows with the candidate
+                List<Integer> columns = new ArrayList<>();
+                for(Cell cell: grid.getRowCells(row)){
+                    if(cell.contains(cand)){
+                        columns.add(cell.getColumn());
+                    }
+                }
+                for(int r = 0; r < 9; r++){
+                    if(r == row){
+                        continue;
+                    }
+                    Map<Integer, Integer> frequencyTwo = grid.getRowCands(r);
+                    //If found an xwing
+                    if(frequencyTwo.get(cand) == 2
+                            && grid.getCands(r, columns.get(0)).contains(cand)
+                            && grid.getCands(r, columns.get(1)).contains(cand)){
+                        //remove from the two column in all other rows
+                        for(int r2 = 0; r2 < 9; r2++){
+                            if(r2 == r || r2 == row){
+                                continue;
+                            }
+                            didChange |= removeAndCallNaked(r2, columns.get(0), cand, changedCoords);
+                            didChange |= removeAndCallNaked(r2, columns.get(1), cand, changedCoords);
+                        }
+                    }
+                }
+            }
+        }
+        return didChange;
+    }
+
+    private boolean mergeGrid(Grid from, Queue<Integer> changedCoords){
+        boolean didChange = false;
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                Set<Integer> gridCands = grid.getCands(r, c);
+                Set<Integer> fromCands = from.getCands(r, c);
+                if(fromCands.size() < gridCands.size()){
+                    for(int cand: gridCands){
+                        if(!fromCands.contains(cand)){
+                            didChange |= removeAndCallNaked(r, c, cand, changedCoords);
+                        }
+                    }
+                }
+            }
+        }
+        return didChange;
     }
 
     public boolean xYWing(int row, int column, Queue<Integer> changedCoords){

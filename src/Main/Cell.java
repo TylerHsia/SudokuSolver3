@@ -141,7 +141,7 @@ public class Cell {
      * @return an unmodifiable set of the candidates of this list
      */
     public Set<Integer> getCands(){
-        return Collections.unmodifiableSet(candidates);
+        return candidates;
     }
 
     /**

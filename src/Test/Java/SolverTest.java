@@ -129,6 +129,44 @@ public class SolverTest {
         }
     }
 
+    //Todo: test claiming candidates and pointing candidates
+
+    @Test
+    public void test_x_wing(){
+        List<Grid> grids = getGrids(testCasesFile);
+        for(int r = 0; r < 9; r++){
+            boolean contains;
+            if(r == 1 || r == 4){
+                contains = false;
+            } else {
+                contains = true;
+            }
+            for(int c = 0; c < 9; c++){
+                grid = grids.get(23).clone();
+                solver = new Solver(grid);
+                solver.runNakedSingle(changed);
+                solver.xWing(r, c, changed);
+                assertEquals(contains, grid.getCands(3, 4).contains(5));
+            }
+        }
+
+        grid = grids.get(24);
+        solver = new Solver(grid);
+        solver.runNakedSingle(changed);
+        solver.xWing(1, 0, changed);
+        List<Integer> rows = new ArrayList<>();
+        rows.add(1);
+        rows.add(4);
+        for(int r: rows){
+            for(int c = 0; c < 9; c++){
+                if(c == 0 || c == 4){
+                    continue;
+                }
+                assertFalse(grid.getCands(r, c).contains(1));
+            }
+        }
+    }
+
 
     @Test
     public void test_dif_1(){
@@ -171,6 +209,20 @@ public class SolverTest {
     }
 
     @Test
+    public void test_dif_5() {
+        int numSolved = 0;
+        sudokScanner = initializeScanner(difFiles[5]);
+        while (sudokScanner.hasNext()) {
+            grid = new Grid(sudokScanner.next());
+            Solver solver = new Solver(grid);
+            if(solver.solve()){
+                numSolved++;
+            }
+        }
+        System.out.println(numSolved);
+    }
+
+    @Test
     public void test_23_cases() {
         sudokScanner = initializeScanner(difFiles[6]);
         int i = 1;
@@ -198,6 +250,16 @@ public class SolverTest {
             throw new RuntimeException();
         }
     }
+
+    private List<Grid> getGrids(String fileName){
+        sudokScanner = initializeScanner(fileName);
+        List<Grid> grids = new ArrayList<>();
+        while (sudokScanner.hasNext()) {
+            grids.add(new Grid(sudokScanner.nextLine()));
+        }
+        return grids;
+    }
+
 
     private List<Cell> locals(Grid grid, int row, int column){
         List<Cell> cells = new ArrayList<>();
