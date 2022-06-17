@@ -86,7 +86,13 @@ public class Permuter {
      * @return a new grid that is rotated
      */
     public static Grid rotateCounterClockwise(Grid grid){
-        return rotateClockwise(rotateClockwise(rotateClockwise(grid)));
+        Grid rotated = new Grid();
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                copyCell(grid.getCell(c, 8 - r), rotated.getCell(r, c));
+            }
+        }
+        return rotated;
     }
 
     /**
