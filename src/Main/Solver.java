@@ -407,6 +407,7 @@ public class Solver {
      */
     public boolean xWing(int row, int column, Queue<Integer> changedCoords){
         boolean didChange = xWingRows(grid, row, changedCoords);
+        //rotate 90 and do x wings to rotated grid, then merge
         Grid clockwise = Permuter.rotateClockwise(grid);
         Solver clockwiseSolver = new Solver(clockwise);
         didChange |= clockwiseSolver.xWingRows(clockwise, column, new QueueSet<Integer>());
@@ -414,6 +415,14 @@ public class Solver {
         return didChange;
     }
 
+    /**
+     * Performs x wings with row bases.
+     * @param grid the grid for x wing to be performed on
+     * @param row one base row to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
     private boolean xWingRows(Grid grid, int row, Queue<Integer> changedCoords){
         boolean didChange = false;
         Map<Integer, Integer> frequency = grid.getRowCands(row);
@@ -450,6 +459,14 @@ public class Solver {
         return didChange;
     }
 
+    /**
+     * Takes the grid from, and keeps only the intersection of candidates in each cell of this.grid
+     * and the Grid from.
+     * @param from the grid to be merged with this.grid
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
     private boolean mergeGrid(Grid from, Queue<Integer> changedCoords){
         boolean didChange = false;
         for(int r = 0; r < 9; r++){
@@ -477,10 +494,6 @@ public class Solver {
     }
 
     public boolean forcingChains(int row, int column, int length, Queue<Integer> changedCoords){
-        return false;
-    }
-
-    public boolean bruteForce(){
         return false;
     }
 
