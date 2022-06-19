@@ -12,6 +12,7 @@ public class Solver {
     private void checkRep(){
         if(DEBUG){
             assert(!grid.hasDuplicate());
+            //assert(Generator.bruteForceSolver(grid.clone()));
         }
     }
 
@@ -45,8 +46,10 @@ public class Solver {
                     nakedCandidateN(row, column, n, changedCoords);
                 }
                 pointingCandidates(row, column, changedCoords);
+                //System.out.println(row + " " + column);
                 claimingCandidates(row, column, changedCoords);
                 xWing(row, column, changedCoords);
+                xYWing(row, column, changedCoords);
                 checkRep();
             }
         }
@@ -485,8 +488,87 @@ public class Solver {
         return didChange;
     }
 
+    /**
+     * Checks for an xy wing with any of the seen cells of this row and column as a pivot
+     * @param row one primary row to be looked at
+     * @param column one primary column to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
     public boolean xYWing(int row, int column, Queue<Integer> changedCoords){
-        return false;
+        boolean didChange = false;
+        for(Cell cell: grid.getSeenCells(row, column)){
+            didChange |= xYWingOneCell(cell.getRow(), cell.getColumn(), changedCoords);
+            checkRep();
+        }
+        return didChange;
+    }
+
+    /**
+     * Checks for an xy wing with this row and column as the pivot
+     * @param row one primary row to be looked at
+     * @param column one primary column to be looked at
+     * @param changedCoords a queue of coords. All changed cells will have their coords
+     *        added to changedCoords
+     * @return true iff a change was made
+     */
+    private boolean xYWingOneCell(int row, int column, Queue<Integer> changedCoords){
+        boolean didChange = false;
+        if(grid.getCands(row, column).size() == 2){
+            Iterator<Integer> candItr = grid.getCands(row, column).iterator();
+            int candOne = candItr.next();
+            int candTwo = candItr.next();
+            List<Cell> seen = grid.getSeenCells(row, column);
+            List<Cell> possiblePincer = keepCandRange(seen, 2, 2);
+            possiblePincer.removeIf(next -> !next.contains(candOne) && !next.contains(candTwo)
+                    || next.contains(candOne) && next.contains(candTwo));
+            Map<Integer, Integer> pincerFrequency = grid.getCandsMapping(possiblePincer);
+            for(int cand = 1; cand <= 9; cand++){
+                //don't check for a cand already in pivot cell
+                if(cand == candOne || cand == candTwo){
+                    continue;
+                }
+                if(pincerFrequency.get(cand) == 2){
+                    //found xywing
+                    //find pincer cells
+                    List<Cell> pincers = new ArrayList<>();
+                    for(Cell cell: possiblePincer){
+                        if(cell.contains(cand)){
+                            pincers.add(cell);
+                        }
+                    }
+                    Cell pincOne = pincers.get(0);
+                    Cell pincTwo = pincers.get(1);
+                    //if pincers don't have one each of candOne and candTwo - this is not xy wing
+                    if(pincOne.contains(candOne) && pincTwo.contains(candOne) ||
+                            pincOne.contains(candTwo) && pincTwo.contains(candTwo)){
+                        continue;
+                    }
+                    //if found an x wing, find the intersection of their seen sets
+                    List<Cell> seenPincOne = grid.getSeenCells(pincers.get(0).getRow(), pincers.get(0).getColumn());
+                    List<Cell> seenPincTwo = grid.getSeenCells(pincers.get(1).getRow(), pincers.get(1).getColumn());
+                    Set<Cell> setOne = new HashSet<>(seenPincOne);
+                    Set<Cell> intersection = new HashSet<>();
+                    for(Cell cell: seenPincTwo){
+                        if(setOne.contains(cell)){
+                            intersection.add(cell);
+                        }
+                    }
+                    intersection.removeAll(pincers);
+                    for(Cell cell: intersection){
+                        didChange |= removeAndCallNaked(cell, cand, changedCoords);
+                    }
+                    if(didChange){
+                        //prevent from checking for multiple x wings with non updated frequency counts
+                        //x wings will be called again because this row and column will have been added
+                        //to changedCoords again
+                        return true;
+                    }
+                }
+            }
+        }
+        return didChange;
     }
 
     public boolean basicFish(int row, int column, Queue<Integer> changedCoords){
@@ -499,7 +581,7 @@ public class Solver {
 
     /**
      * Removes all solved cells and cells with more than maxCands or less than minCands candidates
-     * from a list of cells
+     * from a list of cells, inclusive
      * @param cells the list of cells for cells to be removed from
      * @param minCands the minimum number of cands to remain in the list
      * @param maxCands the maximum number of cands to remain in the list

@@ -167,6 +167,34 @@ public class SolverTest {
         }
     }
 
+    @Test
+    public void test_xy_wing(){
+        List<Grid> dif5 = getGrids(difFiles[5]);
+        int[] solveAbleXYWing = {2, 19, 22, 26, 50, 59, 65, 80, 84, 97};
+        for(int x: solveAbleXYWing){
+            solver = new Solver(dif5.get(x - 1));
+            assertTrue(solver.solve());
+        }
+        List<Grid> grids = getGrids(testCasesFile);
+        List<Cell> cellsSeen = grid.getSeenCells(0, 2);
+        for(Cell cell: cellsSeen){
+            grid = grids.get(25).clone();
+            solver = new Solver(grid);
+            solver.runNakedSingle(changed);
+            solver.xYWing(cell.getRow(), cell.getColumn(), changed);
+            assertFalse(grid.getCands(1, 5).contains(2));
+        }
+
+        grid = grids.get(26);
+        solver = new Solver(grid);
+        solver.runNakedSingle(changed);
+        solver.xYWing(3, 0, changed);
+        for(int c = 3; c < 9; c++){
+            assertFalse(grid.getCands(4, c).contains(9));
+        }
+        assertFalse(grid.getCands(3, 1).contains(9));
+        assertFalse(grid.getCands(3, 2).contains(9));
+    }
 
     @Test
     public void test_dif_1(){
@@ -212,12 +240,16 @@ public class SolverTest {
     public void test_dif_5() {
         int numSolved = 0;
         sudokScanner = initializeScanner(difFiles[5]);
+        int i = 1;
         while (sudokScanner.hasNext()) {
             grid = new Grid(sudokScanner.next());
+            Grid unsolved = grid.clone();
             Solver solver = new Solver(grid);
             if(solver.solve()){
+                System.out.println(i);
                 numSolved++;
             }
+            i++;
         }
         System.out.println(numSolved);
     }
