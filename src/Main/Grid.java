@@ -156,7 +156,7 @@ public class Grid implements Iterable<Cell> {
      * @return a map of 1-9 to the number of times they are candidates in the row
      */
     public Map<Integer,Integer> getRowCands(int row){
-        return getCands(getRowCells(row));
+        return getCandsMapping(getRowCells(row));
     }
 
     /**
@@ -166,7 +166,7 @@ public class Grid implements Iterable<Cell> {
      * @return a map of 1-9 to the number of times they are candidates in the column
      */
     public Map<Integer, Integer> getColumnCands(int column){
-        return getCands(getColumnCells(column));
+        return getCandsMapping(getColumnCells(column));
     }
 
     /**
@@ -177,7 +177,7 @@ public class Grid implements Iterable<Cell> {
      * @return a map of 1-9 to the number of times they are candidates in the box
      */
     public Map<Integer, Integer> getBoxCands(int row, int column){
-        return getCands(getBoxCells(row, column));
+        return getCandsMapping(getBoxCells(row, column));
     }
 
     /**
@@ -187,7 +187,7 @@ public class Grid implements Iterable<Cell> {
      * @param cells the list of cells whose candidates will be summed
      * @return a map of 1-9 to the number of times they are candidates in cells
      */
-    private Map<Integer, Integer> getCands(List<Cell> cells){
+    public Map<Integer, Integer> getCandsMapping(List<Cell> cells){
         Map<Integer, Integer> cands = new HashMap<>(9);
         for(int i = 1; i <= 9; i++){
             cands.put(i, 0);
@@ -256,6 +256,40 @@ public class Grid implements Iterable<Cell> {
             }
         }
         return bCells;
+    }
+
+    /**
+     * Returns a list of all cells, including the cell at the given row, column,
+     * that are in the local column, row, or box
+     * @param row the row of the cells to be looked at
+     * @param column the column of the cells to be looked at
+     * @return a list of all cells "seen" by the cell at position (row, column)
+     */
+    public List<Cell> getSeenCells(int row, int column){
+        List<Cell> cells = new ArrayList<>();
+        for(int c = 0; c < 9; c++){
+            cells.add(getCell(row, c));
+        }
+        for(int r = 0; r < 9; r++){
+            if(r == row){
+                continue;
+            }
+            cells.add(getCell(r, column));
+        }
+        int rX = row / 3;
+        int cX = column / 3;
+        for (int r = rX * 3; r < rX * 3 + 3; r++) {
+            if(r == row){
+                continue;
+            }
+            for (int c = cX * 3; c < cX * 3 + 3; c++) {
+                if(c == column){
+                    continue;
+                }
+                cells.add(getCell(r, c));
+            }
+        }
+        return cells;
     }
 
     /**
