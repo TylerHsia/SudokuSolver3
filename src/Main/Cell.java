@@ -162,8 +162,23 @@ public class Cell {
             return false;
         }
         Cell otherCell = (Cell) other;
-        return this.candidates.equals(otherCell.candidates);
+        return this.candidates.equals(otherCell.candidates)
+                && this.getRow() == otherCell.getRow()
+                && this.getColumn() == otherCell.getColumn();
     }
+
+
+    /**
+     * @return a hashCode for this
+     */
+    @Override
+    public int hashCode(){
+        // reminder to not add cells to a hashmap if
+        // there is any possibility of them changing
+        throw new UnsupportedOperationException();
+        //return candidates.hashCode();
+    }
+
 
     /**
      * checks if a value is in valid range
