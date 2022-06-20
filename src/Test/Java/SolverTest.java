@@ -200,7 +200,7 @@ public class SolverTest {
     public void test_dif_1(){
         sudokScanner = initializeScanner(difFiles[1]);
         while(sudokScanner.hasNext()){
-            grid = new Grid(sudokScanner.next());
+            grid = new Grid(sudokScanner.nextLine());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
         }
@@ -210,7 +210,7 @@ public class SolverTest {
     public void test_dif_2() {
         sudokScanner = initializeScanner(difFiles[2]);
         while (sudokScanner.hasNext()) {
-            grid = new Grid(sudokScanner.next());
+            grid = new Grid(sudokScanner.nextLine());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
         }
@@ -220,7 +220,7 @@ public class SolverTest {
     public void test_dif_3() {
         sudokScanner = initializeScanner(difFiles[3]);
         while (sudokScanner.hasNext()) {
-            grid = new Grid(sudokScanner.next());
+            grid = new Grid(sudokScanner.nextLine());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
         }
@@ -230,7 +230,7 @@ public class SolverTest {
     public void test_dif_4() {
         sudokScanner = initializeScanner(difFiles[4]);
         while (sudokScanner.hasNext()) {
-            grid = new Grid(sudokScanner.next());
+            grid = new Grid(sudokScanner.nextLine());
             Solver solver = new Solver(grid);
             assertTrue(solver.solve());
         }
@@ -242,7 +242,7 @@ public class SolverTest {
         sudokScanner = initializeScanner(difFiles[5]);
         int i = 1;
         while (sudokScanner.hasNext()) {
-            grid = new Grid(sudokScanner.next());
+            grid = new Grid(sudokScanner.nextLine());
             Grid unsolved = grid.clone();
             Solver solver = new Solver(grid);
             if(solver.solve()){

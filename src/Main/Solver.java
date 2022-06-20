@@ -7,12 +7,21 @@ public class Solver {
     public Grid grid; // do not modify outside of class
     private Queue<Integer> changedCoords;
     private final boolean DEBUG = true;
+    private Grid solved;
     private Set<Integer> removedRookBox; //a hashset of all cell coords that removeRookBox has been called on
 
     private void checkRep(){
         if(DEBUG){
             assert(!grid.hasDuplicate());
-            //assert(Generator.bruteForceSolver(grid.clone()));
+            if(solved == null){
+                solved = grid.clone();
+                assert(Generator.bruteForceSolver(solved));
+            }
+            for(int r = 0; r < 9; r++){
+                for(int c = 0; c < 9; c++){
+                    assert(grid.getCands(r, c).contains(solved.getVal(r, c)));
+                }
+            }
         }
     }
 
@@ -377,7 +386,7 @@ public class Solver {
             //only look at cands that appear 2 or three times in the group
             if(frequency.get(cand) == 2 || frequency.get(cand) == 3){
                 Set<Integer> boxCoords = new HashSet<>(9);
-                Set<Cell> contains = new HashSet<>();
+                List<Cell> contains = new ArrayList<>();
                 for(Cell cell: unsolved){
                     if(cell.contains(cand)){
                         contains.add(cell);
@@ -386,7 +395,7 @@ public class Solver {
                 }
                 //if found a pointing set in the set
                 if(boxCoords.size() == 1){
-                    Cell contained = contains.iterator().next();
+                    Cell contained = contains.get(0);
                     for(Cell cell: grid.getBoxCells(contained.getRow(), contained.getColumn())){
                         if(!contains.contains(cell)){
                             didChange |= removeAndCallNaked(cell, cand, changedCoords);
@@ -546,11 +555,10 @@ public class Solver {
                         continue;
                     }
                     //if found an x wing, find the intersection of their seen sets
-                    List<Cell> seenPincOne = grid.getSeenCells(pincers.get(0).getRow(), pincers.get(0).getColumn());
-                    List<Cell> seenPincTwo = grid.getSeenCells(pincers.get(1).getRow(), pincers.get(1).getColumn());
-                    Set<Cell> setOne = new HashSet<>(seenPincOne);
-                    Set<Cell> intersection = new HashSet<>();
-                    for(Cell cell: seenPincTwo){
+                    List<Cell> setOne = grid.getSeenCells(pincers.get(0).getRow(), pincers.get(0).getColumn());
+                    List<Cell> setTwo = grid.getSeenCells(pincers.get(1).getRow(), pincers.get(1).getColumn());
+                    Collection<Cell> intersection = new ArrayList<>();
+                    for(Cell cell: setTwo){
                         if(setOne.contains(cell)){
                             intersection.add(cell);
                         }
