@@ -31,21 +31,34 @@ public class GeneratorTest {
     @Test
     public void test_all_stored_valid(){
         for(int i = 1; i <= 6; i++){
-            sudokScanner = initializeScanner(difFiles[3]);
+            sudokScanner = initializeScanner(difFiles[i]);
+            int j = 1;
             while (sudokScanner.hasNext()) {
-                grid = new Grid(sudokScanner.next());
-                System.out.println(grid);
+                System.out.println(i + " " + j);
+                grid = new Grid(sudokScanner.nextLine());
+
                 assertTrue(Generator.isValid(grid));
+                j++;
             }
         }
     }
+
+    @Test
+    public void test_is_valid(){
+        assertFalse(Generator.isValid(grid));
+        List<Grid> testCases = getGrids(testCasesFile);
+        for(int i = 29; i < 49; i++){
+            assertFalse(Generator.isValid(testCases.get(i)));
+        }
+    }
+
     @Test
     public void test_brute_force_solves(){
         for(int i = 1; i <= 6; i++){
-            sudokScanner = initializeScanner(difFiles[3]);
+            sudokScanner = initializeScanner(difFiles[i]);
             while (sudokScanner.hasNext()) {
-                grid = new Grid(sudokScanner.next());
-                assertTrue(Generator.isValid(grid));
+                grid = new Grid(sudokScanner.nextLine());
+                assertTrue(Generator.bruteForceSolver(grid));
             }
         }
     }
@@ -94,6 +107,15 @@ public class GeneratorTest {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    private List<Grid> getGrids(String fileName){
+        sudokScanner = initializeScanner(fileName);
+        List<Grid> grids = new ArrayList<>();
+        while (sudokScanner.hasNext()) {
+            grids.add(new Grid(sudokScanner.nextLine()));
+        }
+        return grids;
     }
 }
 

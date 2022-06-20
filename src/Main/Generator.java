@@ -9,49 +9,29 @@ public class Generator {
      * @return true iff the grid has exactly one solution
      */
     public static boolean isValid(Grid grid){
-        Solver solver = new Solver(grid);
-        solver.solve();
-        if(grid.hasDuplicate()){
+        if(grid.numSolved() < 16){
+            //there is no known sudoku with fewer than 16 givens
             return false;
-        } else if(grid.numSolved() == 81){
-            return true;
         }
-        return isValid(grid, grid.getCells(), 0);
-    }
-
-    /**
-     * Returns whether the given grid has exactly one solution
-     * @param grid the grid to be checked
-     * @param cells the list of all cells in the grid
-     * @param
-     * @return true iff the grid has exactly one solution
-     */
-    private static boolean isValid(Grid grid, List<Cell> cells, int index){
-        for(int i = index; i < 81; i++){
-            Cell cell = cells.get(i);
-            if(!cell.isSolved()){
-                boolean solvedOne = false;
-                Set<Integer> cands = cell.getCands();
-                for(int cand: cands){
-                    Grid copy = grid.clone();
-                    copy.solveCell(cell.getRow(), cell.getColumn(), cand);
-                    try{
-                        Solver solver = new Solver(copy);
-                        solver.solve();
-                    } catch(Throwable e){
-                        continue;
-                    }
-                    if(isValid(copy, copy.getCells(), i + 1)){
-                        if(solvedOne){
-                            return false;
-                        } else {
-                            solvedOne = true;
-                        }
-                    }
-                }
+        grid = grid.clone();
+        Solver solver = new Solver(grid);
+        try{
+            if(solver.solve()){
+                return true;
             }
+        } catch(Throwable e){
+            return false;
         }
-        return true;
+
+        Grid inOrder = grid.clone();
+        Grid revOrder = grid.clone();
+        List<Integer> candidates = new ArrayList<>();
+        for(int i = 9; i >= 1; i--){
+            candidates.add(i);
+        }
+        boolean solved = bruteForceSolver(inOrder);
+        bruteForceSolver(revOrder, candidates);
+        return solved && inOrder.equals(revOrder);
     }
 
     /**
@@ -88,7 +68,7 @@ public class Generator {
                 }
             }
         }
-        return true;
+        return solved != null;
     }
 
     /**
@@ -125,13 +105,27 @@ public class Generator {
      * @return true if the grid was solved
      */
     public static boolean bruteForceSolver(Grid grid){
+        List<Integer> candidates = new ArrayList<>();
+        for(int i = 1; i <= 9; i++){
+            candidates.add(i);
+        }
+        return bruteForceSolver(grid, candidates);
+    }
+
+    /**
+     * Solves the given grid by brute force, using the given list as the order to test candidates
+     * @param grid the grid to be solved
+     * @param candidates an ordered list of candidates [1,9] that determines the order to be tested.
+     * @return true if the grid was solved
+     */
+    private static boolean bruteForceSolver(Grid grid, List<Integer> candidates){
         int[][] intGrid = new int[9][9];
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
                 intGrid[r][c] = grid.getVal(r, c);
             }
         }
-        bruteForceSolver(intGrid);
+        bruteForceSolver(intGrid, candidates);
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
                 grid.solveCell(r, c, intGrid[r][c]);
@@ -146,10 +140,24 @@ public class Generator {
      * @return true if the grid was solved
      */
     private static boolean bruteForceSolver(int[][] grid){
+        List<Integer> candidates = new ArrayList<>();
+        for(int i = 1; i <= 9; i++){
+            candidates.add(i);
+        }
+        return bruteForceSolver(grid, candidates);
+    }
+
+    /**
+     * Solves the given grid by brute force, using the given list as the order to test candidates
+     * @param grid the grid to be solved
+     * @param candidates an ordered list of candidates [1,9] that determines the order to be tested.
+     * @return true if the grid was solved
+     */
+    private static boolean bruteForceSolver(int[][] grid, List<Integer> candidates){
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
                 if(grid[r][c] == 0){
-                    for(int cand = 1; cand <= 9; cand++){
+                    for(int cand: candidates){
                         if(isValidPlacement(grid, cand, r, c)){
                             grid[r][c] = cand;
                             if(bruteForceSolver(grid)){
@@ -165,6 +173,8 @@ public class Generator {
         }
         return true;
     }
+
+
 
     /**
      * Checker for if a candidate can be placed in a certain position in a grid
